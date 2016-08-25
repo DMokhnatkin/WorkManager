@@ -52,7 +52,7 @@ namespace WorkManager.Controllers
                 return NotFound();
             }
 
-            if (!CanAccessToProject(project))
+            if (!await CanAccessToProject(project))
                 return NotFound();
 
             DetailsViewModel model = new DetailsViewModel()
@@ -101,7 +101,7 @@ namespace WorkManager.Controllers
                 return NotFound();
             }
 
-            if (!CanAccessToProject(project))
+            if (!await CanAccessToProject(project))
                 return NotFound();
 
             return View(project);
@@ -119,7 +119,7 @@ namespace WorkManager.Controllers
                 return NotFound();
             }
 
-            if (!CanAccessToProject(project))
+            if (!await CanAccessToProject(project))
                 return NotFound();
 
             if (ModelState.IsValid)
@@ -159,7 +159,7 @@ namespace WorkManager.Controllers
                 return NotFound();
             }
 
-            if (!CanAccessToProject(project))
+            if (!await CanAccessToProject(project))
                 return NotFound();
 
             return View(project);
@@ -172,7 +172,7 @@ namespace WorkManager.Controllers
         {
             var project = await _context.Projects.SingleOrDefaultAsync(m => m.Id == id);
 
-            if (!CanAccessToProject(project))
+            if (!await CanAccessToProject(project))
                 return NotFound();
 
             _context.Projects.Remove(project);
@@ -185,7 +185,7 @@ namespace WorkManager.Controllers
             return _context.Projects.Any(e => e.Id == id);
         }
 
-        private bool CanAccessToProject(Project project)
+        private async Task<bool> CanAccessToProject(Project project)
         {
             // If OwnerId is null, load it from database
             if (project.OwnerId == null)
@@ -193,7 +193,7 @@ namespace WorkManager.Controllers
                     .Where(x => x.Id == project.Id)
                     .Select(x => x.OwnerId)
                     .Single();
-            return project.OwnerId == _userManager.GetUserId(User);
+            return await _authorizationService.AuthorizeAsync(User, project, "IsOwner");
         }
     }
 }
