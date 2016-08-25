@@ -12,6 +12,8 @@ using Microsoft.Extensions.Logging;
 using WorkManager.Data;
 using WorkManager.Models;
 using WorkManager.Services;
+using Microsoft.AspNetCore.Authorization;
+using WorkManager.Authorization;
 
 namespace WorkManager
 {

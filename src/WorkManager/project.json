@@ -1,4 +1,4 @@
-﻿{
+{
   "userSecretsId": "aspnet-WorkManager-9b8b20d1-a34e-428d-8689-674cc67f0d53",
 
   "dependencies": {
@@ -71,7 +71,8 @@
 
   "buildOptions": {
     "emitEntryPoint": true,
-    "preserveCompilationContext": true
+    "preserveCompilationContext": true,
+    "define": []
   },
 
   "runtimeOptions": {

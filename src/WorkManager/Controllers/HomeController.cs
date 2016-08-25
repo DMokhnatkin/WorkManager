@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace WorkManager.Controllers
 {
@@ -10,7 +11,12 @@ namespace WorkManager.Controllers
     {
         public IActionResult Index()
         {
-            return View();
+            return RedirectToAction("Index", "Projects");
+        }
+
+        public IActionResult Test(int id)
+        {
+            return NotFound();
         }
 
         public IActionResult About()
