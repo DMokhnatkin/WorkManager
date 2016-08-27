@@ -8,6 +8,7 @@ using WorkManager.Data;
 using WorkManager.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace WorkManager.Controllers.Api
 {
@@ -78,6 +79,37 @@ namespace WorkManager.Controllers.Api
             return Ok();
         }
 
+        // Get today timers
+        [HttpGet("today/{projectId:int}")]
+        public IActionResult TodayStatistics(int projectId, [FromQuery]string timezoneId)
+        {
+            var timeZone = timezoneId == null ? TimeZoneInfo.Utc : TimeZoneInfo.FindSystemTimeZoneById(timezoneId);
+            var timeofday = TimeZoneInfo.ConvertTime(DateTime.UtcNow, timeZone).TimeOfDay;
+            // When current local day started in utc time
+            var localday_started_in_utc = DateTime.UtcNow - timeofday;
+            return RedirectToAction("Statistics",
+                new
+                {
+                    projectId = projectId,
+                    from = localday_started_in_utc,
+                });
+        }
+
+        // Get timers in time interval. from, to - Utc time
+        [HttpGet("statistics/{projectId:int}")]
+        public async Task<IActionResult> Statistics(int projectId, [FromQuery]DateTime from, [FromQuery]DateTime? to)
+        {
+            var project = _context.Projects.SingleOrDefault(x => x.Id == projectId);
+            if (project == null)
+                return NotFound();
+
+            if (!await _authorizationService.AuthorizeAsync(User, project, "IsOwner"))
+                return NotFound();
+
+            return new OkObjectResult(
+                await GetTimersInInterval(project, from, to).ToListAsync());
+        }
+
         private Timer GetOpenedTimer(Project project)
         {
             var opened_timer = _context.Timers
@@ -85,6 +117,16 @@ namespace WorkManager.Controllers.Api
                 .Where(x => x.Stopped == null)
                 .SingleOrDefault();
             return opened_timer;
+        }
+
+        private IQueryable<Timer> GetTimersInInterval(Project project, DateTime from, DateTime? to)
+        {
+            var query = _context.Timers
+                .Where(x => x.ProjectId == project.Id)
+                .Where(x => x.Started >= from);
+            if (to != null)
+                query.Where(x => x.Stopped <= to);
+            return query;
         }
     }
 }
