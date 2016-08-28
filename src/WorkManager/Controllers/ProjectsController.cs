@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authorization;
 using WorkManager.Authorization;
 using WorkManager.Models.ProjectsViewModels;
+using System.Globalization;
 
 namespace WorkManager.Controllers
 {
@@ -59,6 +60,8 @@ namespace WorkManager.Controllers
             {
                 Title = project.Title,
                 Description = project.Description,
+                TimeZone = project.TimeZone,
+                Culture = project.Culture
             };
 
             return View(model);
@@ -104,7 +107,23 @@ namespace WorkManager.Controllers
             if (!await CanAccessToProject(project))
                 return NotFound();
 
-            return View(project);
+            var viewModel = new EditViewModel()
+            {
+                Id = project.Id,
+                Title = project.Title,
+                Description = project.Description,
+                TimeZone = project.TimeZone,
+                Culture = project.Culture,
+
+                TimeZoneList = TimeZoneInfo.GetSystemTimeZones().Select(x => new SelectListItem() { Text = x.Id, Value = x.Id }).ToList(),
+                CultureList = new List<SelectListItem>()
+                {
+                    new SelectListItem() { Text = "Russian", Value = "ru-Ru" },
+                    new SelectListItem() { Text = "English(US)", Value = "en-US" }
+                },
+            };
+
+            return View(viewModel);
         }
 
         // POST: Projects/Edit/5
@@ -112,7 +131,7 @@ namespace WorkManager.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Description,Title")] Project project)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Description,Title,TimeZone,Culture")] Project project)
         {
             if (id != project.Id)
             {
