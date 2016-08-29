@@ -15,6 +15,7 @@ using WorkManager.Services;
 using Microsoft.AspNetCore.Authorization;
 using WorkManager.Authorization;
 using static WorkManager.Authorization.IsOwnerRequirment;
+using WorkManager.Services.Projects;
 
 namespace WorkManager
 {
@@ -62,6 +63,8 @@ namespace WorkManager
             {
                 options.AddPolicy("IsOwner", policy => policy.Requirements.Add(new IsOwnerRequirment()));
             });
+
+            services.AddSingleton<IProjectsService, ProjectsService>();
 
             // Add application services.
             services.AddTransient<IEmailSender, AuthMessageSender>();

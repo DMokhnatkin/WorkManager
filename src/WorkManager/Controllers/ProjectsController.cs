@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Authorization;
 using WorkManager.Authorization;
 using WorkManager.Models.ProjectsViewModels;
 using System.Globalization;
+using WorkManager.Services.Projects;
 
 namespace WorkManager.Controllers
 {
@@ -21,22 +22,24 @@ namespace WorkManager.Controllers
         private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IAuthorizationService _authorizationService;
+        private readonly IProjectsService _projects;
 
         public ProjectsController(ApplicationDbContext context,
             UserManager<ApplicationUser> userManager,
-            IAuthorizationService authorizationService)
+            IAuthorizationService authorizationService,
+            IProjectsService projects)
         {
             _context = context;
             _userManager = userManager;
             _authorizationService = authorizationService;
+            _projects = projects;
         }
 
         // GET: Projects
         public async Task<IActionResult> Index()
         {
             var userId = _userManager.GetUserId(User);
-            var applicationDbContext = _context.Projects.Where(x => x.Owner.Id == userId);
-            return View(await applicationDbContext.ToListAsync());
+            return View(await _projects.GetProjectsForOwner(userId).ToListAsync());
         }
 
         // GET: Projects/Details/5
@@ -47,7 +50,7 @@ namespace WorkManager.Controllers
                 return NotFound();
             }
 
-            var project = await _context.Projects.SingleOrDefaultAsync(m => m.Id == id);
+            var project = await _projects.GetProjectAsync(id.Value);
             if (project == null)
             {
                 return NotFound();
@@ -98,7 +101,7 @@ namespace WorkManager.Controllers
                 return NotFound();
             }
 
-            var project = await _context.Projects.SingleOrDefaultAsync(m => m.Id == id);
+            var project = await _projects.GetProjectAsync(id.Value);
             if (project == null)
             {
                 return NotFound();
@@ -150,7 +153,7 @@ namespace WorkManager.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!ProjectExists(project.Id))
+                    if (!await _projects.ExistsAsync(project.Id))
                     {
                         return NotFound();
                     }
@@ -172,7 +175,7 @@ namespace WorkManager.Controllers
                 return NotFound();
             }
 
-            var project = await _context.Projects.SingleOrDefaultAsync(m => m.Id == id);
+            var project = await _projects.GetProjectAsync(id.Value);
             if (project == null)
             {
                 return NotFound();
@@ -189,19 +192,13 @@ namespace WorkManager.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var project = await _context.Projects.SingleOrDefaultAsync(m => m.Id == id);
+            var project = await _projects.GetProjectAsync(id);
 
             if (!await CanAccessToProject(project))
                 return NotFound();
 
-            _context.Projects.Remove(project);
-            await _context.SaveChangesAsync();
+            _projects.Remove(project);
             return RedirectToAction("Index");
-        }
-
-        private bool ProjectExists(int id)
-        {
-            return _context.Projects.Any(e => e.Id == id);
         }
 
         private async Task<bool> CanAccessToProject(Project project)
