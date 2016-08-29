@@ -15,6 +15,10 @@ namespace WorkManager.Models
         public DateTime Started { get; set; }
         [DataMember]
         public DateTime? Stopped { get; set; }
+        // It is important in which timezone timer was started 
+        // (timezone for project can be changed and it shouldn't affect statistics)
+        [DataMember]
+        public string TimeZoneId { get; set; }
 
         [DataMember]
         public int ProjectId { get; set; }

@@ -9,6 +9,7 @@ using WorkManager.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.Globalization;
 
 namespace WorkManager.Controllers.Api
 {
@@ -49,7 +50,8 @@ namespace WorkManager.Controllers.Api
             {
                 Started = DateTime.UtcNow,
                 Stopped = null,
-                ProjectId = project.Id
+                ProjectId = project.Id,
+                TimeZoneId = project.TimeZone
             };
             _context.Timers.Add(new_timer);
             await _context.SaveChangesAsync();
@@ -79,11 +81,46 @@ namespace WorkManager.Controllers.Api
             return Ok();
         }
 
+        // Get timers in time interval.
+        [HttpGet("statistics/{projectId:int}")]
+        public async Task<IActionResult> Statistics(int projectId, [FromQuery]DateTime from, [FromQuery]DateTime? to)
+        {
+            var project = _context.Projects.SingleOrDefault(x => x.Id == projectId);
+            if (project == null)
+                return NotFound();
+
+            if (!await _authorizationService.AuthorizeAsync(User, project, "IsOwner"))
+                return NotFound();
+
+            TimeZoneInfo timeZone = TimeZoneInfo.Utc;
+            try
+            {
+                timeZone = TimeZoneInfo.FindSystemTimeZoneById(project.TimeZone);
+            }
+            catch (InvalidTimeZoneException)
+            {
+                return BadRequest("Ivalid timezone");
+            }
+
+            return new OkObjectResult(
+                GetTimersInInterval(project, from, to));
+        }
+
         // Get today timers
         [HttpGet("today/{projectId:int}")]
         public IActionResult TodayStatistics(int projectId, [FromQuery]string timezoneId)
         {
-            var timeZone = timezoneId == null ? TimeZoneInfo.Utc : TimeZoneInfo.FindSystemTimeZoneById(timezoneId);
+            TimeZoneInfo timeZone = TimeZoneInfo.Utc;
+            try
+            {
+                if (timezoneId != null)
+                    timeZone = TimeZoneInfo.FindSystemTimeZoneById(timezoneId);
+            }
+            catch (InvalidTimeZoneException e)
+            {
+                return BadRequest("Ivalid timezone id");
+            }
+
             var timeofday = TimeZoneInfo.ConvertTime(DateTime.UtcNow, timeZone).TimeOfDay;
             // When current local day started in utc time
             var localday_started_in_utc = DateTime.UtcNow - timeofday;
@@ -95,19 +132,45 @@ namespace WorkManager.Controllers.Api
                 });
         }
 
-        // Get timers in time interval. from, to - Utc time
-        [HttpGet("statistics/{projectId:int}")]
-        public async Task<IActionResult> Statistics(int projectId, [FromQuery]DateTime from, [FromQuery]DateTime? to)
+        // Get current week timers
+        [HttpGet("week/{projectId:int}")]
+        public IActionResult WeekStatistics(int projectId, [FromQuery]string timezoneId, [FromQuery]string culture)
         {
-            var project = _context.Projects.SingleOrDefault(x => x.Id == projectId);
-            if (project == null)
-                return NotFound();
+            TimeZoneInfo timeZone = TimeZoneInfo.Utc;
+            try
+            {
+                if (timezoneId != null)
+                    timeZone = TimeZoneInfo.FindSystemTimeZoneById(timezoneId);
+            }
+            catch (InvalidTimeZoneException e)
+            {
+                return BadRequest("Ivalid timezone id");
+            }
 
-            if (!await _authorizationService.AuthorizeAsync(User, project, "IsOwner"))
-                return NotFound();
+            CultureInfo _culture = new CultureInfo("en-US");
+            try
+            {
+                if (culture != null)
+                    _culture = new CultureInfo(culture);
+            }
+            catch (CultureNotFoundException)
+            {
+                return BadRequest("Ivalid culture");
+            }
+            var first_week_day = _culture.DateTimeFormat.FirstDayOfWeek;
 
-            return new OkObjectResult(
-                await GetTimersInInterval(project, from, to).ToListAsync());
+            var local_date = TimeZoneInfo.ConvertTime(DateTime.UtcNow, timeZone);
+            // When week was started in local timezone
+            var local_week_start = StartOfWeek(local_date, first_week_day);
+            // Convert local week started time to utc
+            var local_week_start_utc = TimeZoneInfo.ConvertTime(local_week_start, TimeZoneInfo.Utc);
+            return RedirectToAction("Statistics",
+                new
+                {
+                    projectId = projectId,
+                    from = local_week_start_utc,
+                    group_by_days = true
+                });
         }
 
         private Timer GetOpenedTimer(Project project)
@@ -119,7 +182,7 @@ namespace WorkManager.Controllers.Api
             return opened_timer;
         }
 
-        private IQueryable<Timer> GetTimersInInterval(Project project, DateTime from, DateTime? to)
+        private IQueryable GetTimersInInterval(Project project, DateTime from, DateTime? to)
         {
             var query = _context.Timers
                 .Where(x => x.ProjectId == project.Id)
@@ -127,6 +190,16 @@ namespace WorkManager.Controllers.Api
             if (to != null)
                 query.Where(x => x.Stopped <= to);
             return query;
+        }
+
+        private DateTime StartOfWeek(DateTime dt, DayOfWeek startOfWeek)
+        {
+            int diff = dt.DayOfWeek - startOfWeek;
+            if (diff < 0)
+            {
+                diff += 7;
+            }
+            return dt.AddDays(-1 * diff).Date;
         }
     }
 }
