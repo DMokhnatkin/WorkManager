@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Globalization;
+using WorkManager.Services.Timers;
 
 namespace WorkManager.Controllers.Api
 {
@@ -20,14 +21,17 @@ namespace WorkManager.Controllers.Api
         private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IAuthorizationService _authorizationService;
+        private readonly ITimerService _timers;
 
         public TimersController(ApplicationDbContext context,
             UserManager<ApplicationUser> userManager,
-            IAuthorizationService authorizationService)
+            IAuthorizationService authorizationService,
+            ITimerService timers)
         {
             _context = context;
             _userManager = userManager;
             _authorizationService = authorizationService;
+            _timers = timers;
         }
 
         [HttpGet("start/{projectId:int}")]
@@ -41,20 +45,7 @@ namespace WorkManager.Controllers.Api
             if (!await _authorizationService.AuthorizeAsync(User, project, "IsOwner"))
                 return NotFound();
 
-            var opened_timer = GetOpenedTimer(project);
-            // If some timer is opened we don't need to do anything
-            if (opened_timer != null)
-                return Ok();
-
-            var new_timer = new Timer()
-            {
-                Started = DateTime.UtcNow,
-                Stopped = null,
-                ProjectId = project.Id,
-                TimeZoneId = project.TimeZone
-            };
-            _context.Timers.Add(new_timer);
-            await _context.SaveChangesAsync();
+            await _timers.StartTimerAsync(project);
 
             return Ok();
         }
@@ -70,13 +61,7 @@ namespace WorkManager.Controllers.Api
             if (!await _authorizationService.AuthorizeAsync(User, project, "IsOwner"))
                 return NotFound();
 
-            var opened_timer = GetOpenedTimer(project);
-            if (opened_timer == null)
-                return BadRequest();
-
-            opened_timer.Stopped = DateTime.UtcNow;
-            _context.Timers.Update(opened_timer);
-            await _context.SaveChangesAsync();
+            await _timers.StopTimerAsync(project);
 
             return Ok();
         }
@@ -171,15 +156,6 @@ namespace WorkManager.Controllers.Api
                     from = local_week_start_utc,
                     group_by_days = true
                 });
-        }
-
-        private Timer GetOpenedTimer(Project project)
-        {
-            var opened_timer = _context.Timers
-                .Where(x => x.ProjectId == project.Id)
-                .Where(x => x.Stopped == null)
-                .SingleOrDefault();
-            return opened_timer;
         }
 
         private IQueryable GetTimersInInterval(Project project, DateTime from, DateTime? to)
