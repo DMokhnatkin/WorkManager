@@ -11,7 +11,7 @@ namespace WorkManager.Services.Projects
 {
     public class ProjectsService : IProjectsService
     {
-        ApplicationDbContext _context;
+        private readonly ApplicationDbContext _context;
 
         public ProjectsService(ApplicationDbContext context)
         {

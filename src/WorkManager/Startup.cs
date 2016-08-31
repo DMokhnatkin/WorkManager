@@ -64,7 +64,7 @@ namespace WorkManager
                 options.AddPolicy("IsOwner", policy => policy.Requirements.Add(new IsOwnerRequirment()));
             });
 
-            services.AddSingleton<IProjectsService, ProjectsService>();
+            services.AddScoped<IProjectsService, ProjectsService>();
 
             // Add application services.
             services.AddTransient<IEmailSender, AuthMessageSender>();
