@@ -46,7 +46,7 @@ namespace WorkManager.Services.Projects
             return timeZone;
         }
 
-        public async void Remove(Project project)
+        public async Task Remove(Project project)
         {
             _context.Projects.Remove(project);
             await _context.SaveChangesAsync();

@@ -13,7 +13,7 @@ namespace WorkManager.Services.Projects
         TimeZoneInfo GetTimeZone(Project project);
         CultureInfo GetCulture(Project project);
         IQueryable<Project> GetProjectsForOwner(string ownerId);
-        void Remove(Project project);
+        Task Remove(Project project);
         Task<bool> ExistsAsync(int id);
     }
 }
