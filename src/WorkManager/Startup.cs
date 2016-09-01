@@ -16,6 +16,7 @@ using Microsoft.AspNetCore.Authorization;
 using WorkManager.Authorization;
 using static WorkManager.Authorization.IsOwnerRequirment;
 using WorkManager.Services.Projects;
+using WorkManager.Services.Timers;
 
 namespace WorkManager
 {
@@ -65,6 +66,7 @@ namespace WorkManager
             });
 
             services.AddScoped<IProjectsService, ProjectsService>();
+            services.AddScoped<ITimerService, TimerService>();
 
             // Add application services.
             services.AddTransient<IEmailSender, AuthMessageSender>();
