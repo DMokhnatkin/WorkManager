@@ -61,5 +61,15 @@ namespace WorkManager.Services.Timers
                 .SingleOrDefaultAsync();
             return opened_timer;
         }
+
+        public IQueryable GetTimersInInterval(Project project, DateTime from, DateTime? to)
+        {
+            var query = _context.Timers
+                .Where(x => x.ProjectId == project.Id)
+                .Where(x => x.Started >= from);
+            if (to != null)
+                query.Where(x => x.Stopped <= to);
+            return query;
+        }
     }
 }

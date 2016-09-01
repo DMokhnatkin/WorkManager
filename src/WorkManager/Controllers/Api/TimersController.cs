@@ -88,7 +88,7 @@ namespace WorkManager.Controllers.Api
             }
 
             return new OkObjectResult(
-                GetTimersInInterval(project, from, to));
+                _timers.GetTimersInInterval(project, from, to));
         }
 
         // Get today timers
@@ -156,16 +156,6 @@ namespace WorkManager.Controllers.Api
                     from = local_week_start_utc,
                     group_by_days = true
                 });
-        }
-
-        private IQueryable GetTimersInInterval(Project project, DateTime from, DateTime? to)
-        {
-            var query = _context.Timers
-                .Where(x => x.ProjectId == project.Id)
-                .Where(x => x.Started >= from);
-            if (to != null)
-                query.Where(x => x.Stopped <= to);
-            return query;
         }
 
         private DateTime StartOfWeek(DateTime dt, DayOfWeek startOfWeek)

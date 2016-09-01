@@ -11,5 +11,6 @@ namespace WorkManager.Services.Timers
         Task<Timer> StartTimerAsync(Project project);
         Task<Timer> StopTimerAsync(Project project);
         Task<Timer> GetOpenedTimerAsync(Project project);
+        IQueryable GetTimersInInterval(Project project, DateTime from, DateTime? to);
     }
 }
