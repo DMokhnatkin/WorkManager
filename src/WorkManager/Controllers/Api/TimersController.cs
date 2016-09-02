@@ -128,6 +128,29 @@ namespace WorkManager.Controllers.Api
             return new OkObjectResult(grouped);
         }
 
+        // Get current month timers
+        [HttpGet("week/{projectId:int}")]
+        public async Task<IActionResult> MonthStatistics(int projectId)
+        {
+            var project = await _projects.GetProjectAsync(projectId);
+            if (project == null)
+                return NotFound();
+
+            if (!await _authorizationService.AuthorizeAsync(User, project, "IsOwner"))
+                return NotFound();
+
+            TimeZoneInfo timeZone = _projects.GetTimeZone(project);
+            CultureInfo _culture = _projects.GetCulture(project);
+
+            var now = TimeZoneInfo.ConvertTime(DateTime.UtcNow, TimeZoneInfo.Utc, timeZone);
+            var startOfMonth = StartOfMonth(now);
+
+            var timers = _timers.GetTimersInInterval(project, startOfMonth, null);
+            var grouped = timers.GroupBy(x => x.Started.Date).Select(g => new { Day = g.Key, Timers = g.ToList() });
+
+            return new OkObjectResult(grouped);
+        }
+
         private DateTime StartOfWeek(DateTime dt, DayOfWeek startOfWeek)
         {
             int diff = dt.DayOfWeek - startOfWeek;
@@ -136,6 +159,11 @@ namespace WorkManager.Controllers.Api
                 diff += 7;
             }
             return dt.AddDays(-1 * diff).Date;
+        }
+
+        private DateTime StartOfMonth(DateTime dt)
+        {
+            return new DateTime(dt.Year, dt.Month, 0);
         }
     }
 }
