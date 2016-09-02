@@ -122,8 +122,10 @@ namespace WorkManager.Controllers.Api
             var now = TimeZoneInfo.ConvertTime(DateTime.UtcNow, TimeZoneInfo.Utc, timeZone);
             var startOfWeek = StartOfWeek(now, _culture.DateTimeFormat.FirstDayOfWeek);
 
-            return new OkObjectResult(
-                _timers.GetTimersInInterval(project, startOfWeek, null));
+            var timers = _timers.GetTimersInInterval(project, startOfWeek, null);
+            var grouped = timers.GroupBy(x => x.Started.Date).Select(g => new { Day = g.Key, Timers = g.ToList() });
+
+            return new OkObjectResult(grouped);
         }
 
         private DateTime StartOfWeek(DateTime dt, DayOfWeek startOfWeek)
