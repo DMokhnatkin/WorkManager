@@ -23,13 +23,14 @@ namespace WorkManager.Services.Timers
         public async Task<Timer> StartTimerAsync(Project project)
         {
             var opened_timer = await GetOpenedTimerAsync(project);
-            // If some timer is opened throw exception
             if (opened_timer != null)
                 throw new ArgumentException("Already started");
 
+            var timeZone = _projects.GetTimeZone(project);
+
             var new_timer = new Timer()
             {
-                Started = DateTime.UtcNow,
+                Started = TimeZoneInfo.ConvertTime(DateTime.UtcNow, TimeZoneInfo.Utc, timeZone),
                 Stopped = null,
                 ProjectId = project.Id,
                 TimeZoneId = project.TimeZone
@@ -46,7 +47,7 @@ namespace WorkManager.Services.Timers
             if (opened_timer == null)
                 throw new ArgumentException("Already stoped");
 
-            opened_timer.Stopped = DateTime.UtcNow;
+            opened_timer.Stopped = TimeZoneInfo.ConvertTime(DateTime.UtcNow, TimeZoneInfo.Utc, _projects.GetTimeZone(project));
             _context.Timers.Update(opened_timer);
             await _context.SaveChangesAsync();
 

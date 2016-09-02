@@ -23,13 +23,13 @@ namespace WorkManager.Controllers.Api
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IAuthorizationService _authorizationService;
         private readonly ITimerService _timers;
-        private readonly ProjectsService _projects;
+        private readonly IProjectsService _projects;
 
         public TimersController(ApplicationDbContext context,
             UserManager<ApplicationUser> userManager,
             IAuthorizationService authorizationService,
             ITimerService timers,
-            ProjectsService projects)
+            IProjectsService projects)
         {
             _context = context;
             _userManager = userManager;
@@ -99,16 +99,10 @@ namespace WorkManager.Controllers.Api
                 return NotFound();
 
             TimeZoneInfo timeZone = _projects.GetTimeZone(project);
+            var now = TimeZoneInfo.ConvertTime(DateTime.UtcNow, TimeZoneInfo.Utc, timeZone);
 
-            var timeofday = TimeZoneInfo.ConvertTime(DateTime.UtcNow, timeZone).TimeOfDay;
-            // When current local day started in utc time
-            var localday_started_in_utc = DateTime.UtcNow - timeofday;
-            return RedirectToAction("Statistics",
-                new
-                {
-                    projectId = projectId,
-                    from = localday_started_in_utc,
-                });
+            return new OkObjectResult(
+                _timers.GetTimersInInterval(project, now.Date, null));
         }
 
         // Get current week timers
@@ -124,21 +118,12 @@ namespace WorkManager.Controllers.Api
 
             TimeZoneInfo timeZone = _projects.GetTimeZone(project);
             CultureInfo _culture = _projects.GetCulture(project);
-            
-            var first_week_day = _culture.DateTimeFormat.FirstDayOfWeek;
 
-            var local_date = TimeZoneInfo.ConvertTime(DateTime.UtcNow, timeZone);
-            // When week was started in local timezone
-            var local_week_start = StartOfWeek(local_date, first_week_day);
-            // Convert local week started time to utc
-            var local_week_start_utc = TimeZoneInfo.ConvertTime(local_week_start, TimeZoneInfo.Utc);
-            return RedirectToAction("Statistics",
-                new
-                {
-                    projectId = projectId,
-                    from = local_week_start_utc,
-                    group_by_days = true
-                });
+            var now = TimeZoneInfo.ConvertTime(DateTime.UtcNow, TimeZoneInfo.Utc, timeZone);
+            var startOfWeek = StartOfWeek(now, _culture.DateTimeFormat.FirstDayOfWeek);
+
+            return new OkObjectResult(
+                _timers.GetTimersInInterval(project, startOfWeek, null));
         }
 
         private DateTime StartOfWeek(DateTime dt, DayOfWeek startOfWeek)
