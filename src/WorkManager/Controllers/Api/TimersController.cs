@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Globalization;
 using WorkManager.Services.Timers;
+using WorkManager.Services.Projects;
 
 namespace WorkManager.Controllers.Api
 {
@@ -22,23 +23,26 @@ namespace WorkManager.Controllers.Api
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IAuthorizationService _authorizationService;
         private readonly ITimerService _timers;
+        private readonly ProjectsService _projects;
 
         public TimersController(ApplicationDbContext context,
             UserManager<ApplicationUser> userManager,
             IAuthorizationService authorizationService,
-            ITimerService timers)
+            ITimerService timers,
+            ProjectsService projects)
         {
             _context = context;
             _userManager = userManager;
             _authorizationService = authorizationService;
             _timers = timers;
+            _projects = projects;
         }
 
         [HttpGet("start/{projectId:int}")]
         // Start timer for a project
         public async Task<IActionResult> Start(int projectId)
         {
-            var project = _context.Projects.SingleOrDefault(x => x.Id == projectId);
+            var project = await _projects.GetProjectAsync(projectId);
             if (project == null)
                 return NotFound();
 
@@ -54,7 +58,7 @@ namespace WorkManager.Controllers.Api
         // Stop timer for a project
         public async Task<IActionResult> Stop(int projectId)
         {
-            var project = _context.Projects.SingleOrDefault(x => x.Id == projectId);
+            var project = await _projects.GetProjectAsync(projectId);
             if (project == null)
                 return NotFound();
 
@@ -70,22 +74,14 @@ namespace WorkManager.Controllers.Api
         [HttpGet("statistics/{projectId:int}")]
         public async Task<IActionResult> Statistics(int projectId, [FromQuery]DateTime from, [FromQuery]DateTime? to)
         {
-            var project = _context.Projects.SingleOrDefault(x => x.Id == projectId);
+            var project = await _projects.GetProjectAsync(projectId);
             if (project == null)
                 return NotFound();
 
             if (!await _authorizationService.AuthorizeAsync(User, project, "IsOwner"))
                 return NotFound();
 
-            TimeZoneInfo timeZone = TimeZoneInfo.Utc;
-            try
-            {
-                timeZone = TimeZoneInfo.FindSystemTimeZoneById(project.TimeZone);
-            }
-            catch (InvalidTimeZoneException)
-            {
-                return BadRequest("Ivalid timezone");
-            }
+            TimeZoneInfo timeZone = _projects.GetTimeZone(project);
 
             return new OkObjectResult(
                 _timers.GetTimersInInterval(project, from, to));
@@ -93,18 +89,16 @@ namespace WorkManager.Controllers.Api
 
         // Get today timers
         [HttpGet("today/{projectId:int}")]
-        public IActionResult TodayStatistics(int projectId, [FromQuery]string timezoneId)
+        public async Task<IActionResult> TodayStatistics(int projectId)
         {
-            TimeZoneInfo timeZone = TimeZoneInfo.Utc;
-            try
-            {
-                if (timezoneId != null)
-                    timeZone = TimeZoneInfo.FindSystemTimeZoneById(timezoneId);
-            }
-            catch (InvalidTimeZoneException e)
-            {
-                return BadRequest("Ivalid timezone id");
-            }
+            var project = await _projects.GetProjectAsync(projectId);
+            if (project == null)
+                return NotFound();
+
+            if (!await _authorizationService.AuthorizeAsync(User, project, "IsOwner"))
+                return NotFound();
+
+            TimeZoneInfo timeZone = _projects.GetTimeZone(project);
 
             var timeofday = TimeZoneInfo.ConvertTime(DateTime.UtcNow, timeZone).TimeOfDay;
             // When current local day started in utc time
@@ -119,29 +113,18 @@ namespace WorkManager.Controllers.Api
 
         // Get current week timers
         [HttpGet("week/{projectId:int}")]
-        public IActionResult WeekStatistics(int projectId, [FromQuery]string timezoneId, [FromQuery]string culture)
+        public async Task<IActionResult> WeekStatistics(int projectId)
         {
-            TimeZoneInfo timeZone = TimeZoneInfo.Utc;
-            try
-            {
-                if (timezoneId != null)
-                    timeZone = TimeZoneInfo.FindSystemTimeZoneById(timezoneId);
-            }
-            catch (InvalidTimeZoneException e)
-            {
-                return BadRequest("Ivalid timezone id");
-            }
+            var project = await _projects.GetProjectAsync(projectId);
+            if (project == null)
+                return NotFound();
 
-            CultureInfo _culture = new CultureInfo("en-US");
-            try
-            {
-                if (culture != null)
-                    _culture = new CultureInfo(culture);
-            }
-            catch (CultureNotFoundException)
-            {
-                return BadRequest("Ivalid culture");
-            }
+            if (!await _authorizationService.AuthorizeAsync(User, project, "IsOwner"))
+                return NotFound();
+
+            TimeZoneInfo timeZone = _projects.GetTimeZone(project);
+            CultureInfo _culture = _projects.GetCulture(project);
+            
             var first_week_day = _culture.DateTimeFormat.FirstDayOfWeek;
 
             var local_date = TimeZoneInfo.ConvertTime(DateTime.UtcNow, timeZone);
