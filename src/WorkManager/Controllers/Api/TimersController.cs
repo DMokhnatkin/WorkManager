@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Globalization;
 using WorkManager.Services.Timers;
+using WorkManager.Services.Projects;
 
 namespace WorkManager.Controllers.Api
 {
@@ -22,23 +23,26 @@ namespace WorkManager.Controllers.Api
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IAuthorizationService _authorizationService;
         private readonly ITimerService _timers;
+        private readonly ProjectsService _projects;
 
         public TimersController(ApplicationDbContext context,
             UserManager<ApplicationUser> userManager,
             IAuthorizationService authorizationService,
-            ITimerService timers)
+            ITimerService timers,
+            ProjectsService projects)
         {
             _context = context;
             _userManager = userManager;
             _authorizationService = authorizationService;
             _timers = timers;
+            _projects = projects;
         }
 
         [HttpGet("start/{projectId:int}")]
         // Start timer for a project
         public async Task<IActionResult> Start(int projectId)
         {
-            var project = _context.Projects.SingleOrDefault(x => x.Id == projectId);
+            var project = await _projects.GetProjectAsync(projectId);
             if (project == null)
                 return NotFound();
 
@@ -54,7 +58,7 @@ namespace WorkManager.Controllers.Api
         // Stop timer for a project
         public async Task<IActionResult> Stop(int projectId)
         {
-            var project = _context.Projects.SingleOrDefault(x => x.Id == projectId);
+            var project = await _projects.GetProjectAsync(projectId);
             if (project == null)
                 return NotFound();
 
@@ -70,7 +74,7 @@ namespace WorkManager.Controllers.Api
         [HttpGet("statistics/{projectId:int}")]
         public async Task<IActionResult> Statistics(int projectId, [FromQuery]DateTime from, [FromQuery]DateTime? to)
         {
-            var project = _context.Projects.SingleOrDefault(x => x.Id == projectId);
+            var project = await _projects.GetProjectAsync(projectId);
             if (project == null)
                 return NotFound();
 

@@ -6,11 +6,13 @@ using WorkManager.Models;
 
 namespace WorkManager.Services.Timers
 {
+    public enum GroupTimersBy { day }
+
     public interface ITimerService
     {
         Task<Timer> StartTimerAsync(Project project);
         Task<Timer> StopTimerAsync(Project project);
         Task<Timer> GetOpenedTimerAsync(Project project);
-        IQueryable GetTimersInInterval(Project project, DateTime from, DateTime? to);
+        IQueryable<Timer> GetTimersInInterval(Project project, DateTime from, DateTime? to);
     }
 }

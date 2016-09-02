@@ -62,7 +62,7 @@ namespace WorkManager.Services.Timers
             return opened_timer;
         }
 
-        public IQueryable GetTimersInInterval(Project project, DateTime from, DateTime? to)
+        public IQueryable<Timer> GetTimersInInterval(Project project, DateTime from, DateTime? to)
         {
             var query = _context.Timers
                 .Where(x => x.ProjectId == project.Id)
