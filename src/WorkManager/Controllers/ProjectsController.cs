@@ -73,7 +73,7 @@ namespace WorkManager.Controllers
         // GET: Projects/Create
         public IActionResult Create()
         {
-            return View();
+            return View(new CreateViewModel());
         }
 
         // POST: Projects/Create
@@ -81,8 +81,15 @@ namespace WorkManager.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Description,Title")] Project project)
+        public async Task<IActionResult> Create([Bind("Description,Title,TimeZone,Culture")] CreateViewModel model)
         {
+            Project project = new Project()
+            {
+                Description = model.Description,
+                Title = model.Title,
+                TimeZone = model.TimeZone,
+                Culture = model.Culture
+            };
             if (ModelState.IsValid)
             {
                 project.Owner = await _userManager.GetUserAsync(User);
@@ -117,13 +124,6 @@ namespace WorkManager.Controllers
                 Description = project.Description,
                 TimeZone = project.TimeZone,
                 Culture = project.Culture,
-
-                TimeZoneList = TimeZoneInfo.GetSystemTimeZones().Select(x => new SelectListItem() { Text = x.Id, Value = x.Id }).ToList(),
-                CultureList = new List<SelectListItem>()
-                {
-                    new SelectListItem() { Text = "Russian", Value = "ru-Ru" },
-                    new SelectListItem() { Text = "English(US)", Value = "en-US" }
-                },
             };
 
             return View(viewModel);

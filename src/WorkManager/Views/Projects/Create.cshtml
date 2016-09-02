@@ -1,4 +1,4 @@
-@model WorkManager.Models.Project
+@model WorkManager.Models.ProjectsViewModels.CreateViewModel
 
 @{
     ViewData["Title"] = "Create";
@@ -12,6 +12,13 @@
         <hr />
         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
         <div class="form-group">
+            <label asp-for="Title" class="col-md-2 control-label"></label>
+            <div class="col-md-10">
+                <input asp-for="Title" class="form-control" />
+                <span asp-validation-for="Title" class="text-danger" />
+            </div>
+        </div>
+        <div class="form-group">
             <label asp-for="Description" class="col-md-2 control-label"></label>
             <div class="col-md-10">
                 <input asp-for="Description" class="form-control" />
@@ -19,10 +26,17 @@
             </div>
         </div>
         <div class="form-group">
-            <label asp-for="Title" class="col-md-2 control-label"></label>
+            <label asp-for="TimeZone" class="col-md-2 control-label"></label>
             <div class="col-md-10">
-                <input asp-for="Title" class="form-control" />
-                <span asp-validation-for="Title" class="text-danger" />
+                <select asp-for="TimeZone" asp-items="@Model.TimeZoneList" class="form-control"></select>
+                <span asp-validation-for="TimeZone" class="text-danger" />
+            </div>
+        </div>
+        <div class="form-group">
+            <label asp-for="Culture" class="col-md-2 control-label"></label>
+            <div class="col-md-10">
+                <select asp-for="Culture" asp-items="@Model.CultureList" class="form-control"></select>
+                <span asp-validation-for="Culture" class="text-danger" />
             </div>
         </div>
         <div class="form-group">

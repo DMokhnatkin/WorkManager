@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace WorkManager.Models.ProjectsViewModels
 {
-    public class EditViewModel
+    public class CreateViewModel
     {
         public int Id { get; set; }
         public string Title { get; set; }
@@ -18,7 +18,7 @@ namespace WorkManager.Models.ProjectsViewModels
         public string Culture { get; set; }
         public IEnumerable<SelectListItem> CultureList { get; set; }
 
-        public EditViewModel()
+        public CreateViewModel()
         {
             TimeZoneList = TimeZoneInfo.GetSystemTimeZones().Select(x => new SelectListItem() { Text = x.Id, Value = x.Id }).ToList();
             CultureList = new List<SelectListItem>()
