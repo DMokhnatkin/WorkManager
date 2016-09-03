@@ -100,9 +100,13 @@ namespace WorkManager.Controllers.Api
 
             TimeZoneInfo timeZone = _projects.GetTimeZone(project);
             var now = TimeZoneInfo.ConvertTime(DateTime.UtcNow, TimeZoneInfo.Utc, timeZone);
+            var timers = _timers.GetTimersInInterval(project, now.Date, null);
+            // Maybe allow db to calc total_time?
+            var duration = new TimeSpan();
+            foreach (var timer in timers)
+                duration += _timers.GetDuration(timer);
 
-            return new OkObjectResult(
-                _timers.GetTimersInInterval(project, now.Date, null));
+            return new OkObjectResult(new { timers = timers, duration = duration});
         }
 
         // Get current week timers

@@ -26,11 +26,9 @@ namespace WorkManager.Services.Timers
             if (opened_timer != null)
                 throw new ArgumentException("Already started");
 
-            var timeZone = _projects.GetTimeZone(project);
-
             var new_timer = new Timer()
             {
-                Started = TimeZoneInfo.ConvertTime(DateTime.UtcNow, TimeZoneInfo.Utc, timeZone),
+                Started = GetNowTime(project),
                 Stopped = null,
                 ProjectId = project.Id,
                 TimeZoneId = project.TimeZone
@@ -47,7 +45,7 @@ namespace WorkManager.Services.Timers
             if (opened_timer == null)
                 throw new ArgumentException("Already stoped");
 
-            opened_timer.Stopped = TimeZoneInfo.ConvertTime(DateTime.UtcNow, TimeZoneInfo.Utc, _projects.GetTimeZone(project));
+            opened_timer.Stopped = GetNowTime(project);
             _context.Timers.Update(opened_timer);
             await _context.SaveChangesAsync();
 
@@ -71,6 +69,21 @@ namespace WorkManager.Services.Timers
             if (to != null)
                 query = query.Where(x => x.Stopped <= to);
             return query;
+        }
+
+        public DateTime GetNowTime(Project project)
+        {
+            var timeZone = _projects.GetTimeZone(project);
+            return TimeZoneInfo.ConvertTime(DateTime.UtcNow, TimeZoneInfo.Utc, timeZone);
+        }
+
+        public TimeSpan GetDuration(Timer timer)
+        {
+            if (timer.Stopped != null)
+                return timer.Stopped.Value - timer.Started;
+            else
+                // timer.Project is null. EF core and lazy loading. Smth strange.
+                return GetNowTime(timer.Project) - timer.Started;
         }
     }
 }
