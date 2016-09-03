@@ -8,7 +8,7 @@
 
 <div>
     <div class="jumbotron">
-        <h2>@Html.DisplayFor(model => model.Title)</h2>
+        <h2>@Html.DisplayFor(model => model.Title)</h2><h3 id="today-duration"></h3>
         <h6>@Html.DisplayFor(model => model.Description)</h6>
         <hr />
         <button class="btn btn-primary btn-lg" 
@@ -46,5 +46,17 @@
         $('#stop-btn').click(function () {
             $.get('@Url.Action("stop", "timers", new { projectId = Model.Id })');
         });
+
+        window.setInterval(updateTodayDuration, 1000);
+
+        function updateTodayDuration()
+        {
+                $.get({
+                    url: '@Url.Action("TodayStatistics", "timers", new { projectId = Model.Id })',
+                    success: function (data) {
+                        $('#today-duration').html(data.duration.slice(0, 8));
+                    }
+                });
+        }
     </script>
 }
