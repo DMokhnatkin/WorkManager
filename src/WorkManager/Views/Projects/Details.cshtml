@@ -1,41 +1,50 @@
 @model WorkManager.Models.ProjectsViewModels.DetailsViewModel
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = Model.Title;
 }
 
 <h2>Details</h2>
 
 <div>
-    <h4>Project</h4>
-    <hr />
-    <dl class="dl-horizontal">
-        <dt>
-            @Html.DisplayNameFor(model => model.Description)
-        </dt>
-        <dd>
-            @Html.DisplayFor(model => model.Description)
-        </dd>
-        <dt>
-            @Html.DisplayNameFor(model => model.Title)
-        </dt>
-        <dd>
-            @Html.DisplayFor(model => model.Title)
-        </dd>
-        <dt>
-            @Html.DisplayNameFor(model => model.TimeZone)
-        </dt>
-        <dd>
-            @Html.DisplayFor(model => model.TimeZone)
-        </dd>
-        <dt>
-            @Html.DisplayNameFor(model => model.Culture)
-        </dt>
-        <dd>
-            @Html.DisplayFor(model => model.Culture)
-        </dd>
-    </dl>
+    <div class="jumbotron">
+        <h2>@Html.DisplayFor(model => model.Title)</h2>
+        <h6>@Html.DisplayFor(model => model.Description)</h6>
+        <hr />
+        <button class="btn btn-primary btn-lg" 
+                href="#" 
+                role="button"
+                id="start-btn">Start</button>
+        <button class="btn btn-primary btn-lg" 
+                href="#" 
+                role="button"
+                id="stop-btn">Stop</button>
+        <hr />
+        <table class="table">
+            <thead>
+                <tr>
+                    @foreach (var x in Model.Days)
+                    {
+                        <th>@x</th>
+                    }
+                </tr>
+            </thead>
+        </table>
+    </div>
 </div>
 <div>
     <a asp-action="Index">Back to List</a>
 </div>
+
+@section scripts
+{
+    <script>
+        $('#start-btn').click(function () {
+            $.get('@Url.Action("start", "timers", new { projectId = Model.Id })');
+        });
+
+        $('#stop-btn').click(function () {
+            $.get('@Url.Action("stop", "timers", new { projectId = Model.Id })');
+        });
+    </script>
+}

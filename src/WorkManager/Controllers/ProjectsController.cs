@@ -59,12 +59,22 @@ namespace WorkManager.Controllers
             if (!await CanAccessToProject(project))
                 return NotFound();
 
+            // Generate days list for culture
+            var culture = _projects.GetCulture(project);
+            var days = new List<DayOfWeek>();
+            for (int i = (int)culture.DateTimeFormat.FirstDayOfWeek; i < 7; i++)
+                days.Add((DayOfWeek)i);
+            for (int i = 0; days.Count != 7; i++)
+                days.Add((DayOfWeek)i);
+
             DetailsViewModel model = new DetailsViewModel()
             {
+                Id = project.Id,
                 Title = project.Title,
                 Description = project.Description,
                 TimeZone = project.TimeZone,
-                Culture = project.Culture
+                Culture = project.Culture,
+                Days = days
             };
 
             return View(model);
