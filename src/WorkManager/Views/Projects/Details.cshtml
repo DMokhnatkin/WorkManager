@@ -63,26 +63,35 @@
     <link href="http://arshaw.com/js/fullcalendar-1.5.3/fullcalendar/fullcalendar.print.css" rel="stylesheet" />
 
     <script>
-            $.get({
-                url: '@Url.Action("Statistics", "Timers", new { projectId = Model.Id })',
-                success: function (data) {
-                    $('#calendar').fullCalendar({
-                        header: {
-                            left: 'prev,next today',
-                            center: 'title',
-                            right: 'month,agendaWeek,agendaDay'
-                        },
-                        forceEventDuration: true,
-                        events: data.map(function (currentValue) {
-                            return {
+        $('#calendar').fullCalendar({
+            header: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'month,agendaWeek,agendaDay'
+            },
+            timeFormat: 'H(:mm)',
+            events: function (start, end, callback) {
+                $.get({
+                    url: '@Url.Action("Statistics", "Timers", new { projectId = Model.Id })',
+                    data: {
+                        start: start,
+                        end: end
+                    },
+                    success: function (result) {
+                        var events = [];
+                        result.forEach(function (val) {
+                            events.push({
                                 title: "",
-                                start: currentValue.started,
-                                end: currentValue.stopped,
-                                allDay: false
-                            }
-                        })
-                    })
-                }
-            })
+                                start: val.started,
+                                end: val.stopped,
+                                allDay: false,
+                            });
+                        });
+                        console.log(events);
+                        callback(events);
+                    }
+                });
+            }
+        });
     </script>
 }
