@@ -21,16 +21,9 @@
                 role="button"
                 id="stop-btn">Stop</button>
         <hr />
-        <table class="table">
-            <thead>
-                <tr>
-                    @foreach (var x in Model.Days)
-                    {
-                        <th>@x</th>
-                    }
-                </tr>
-            </thead>
-        </table>
+        <div id="calendar">
+
+        </div>
     </div>
 </div>
 <div>
@@ -56,11 +49,40 @@
         function updateTodayDuration()
         {
                 $.get({
-                    url: '@Url.Action("TodayStatistics", "timers", new { projectId = Model.Id })',
+                    url: '@Url.Action("TodayStatistics", "Timers", new { projectId = Model.Id })',
                     success: function (data) {
                         $('#today-duration').html(moment.duration(data.duration).format("hh:mm:ss", { trim : false }));
                     }
                 });
         }
+    </script>
+
+    <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.23/jquery-ui.min.js" type="text/javascript"></script>
+    <link href="//arshaw.com/js/fullcalendar-1.5.3/fullcalendar/fullcalendar.css" rel="stylesheet" />
+    <script src="//arshaw.com/js/fullcalendar-1.5.3/fullcalendar/fullcalendar.min.js" type="text/javascript"></script>
+    <link href="http://arshaw.com/js/fullcalendar-1.5.3/fullcalendar/fullcalendar.print.css" rel="stylesheet" />
+
+    <script>
+            $.get({
+                url: '@Url.Action("Statistics", "Timers", new { projectId = Model.Id })',
+                success: function (data) {
+                    $('#calendar').fullCalendar({
+                        header: {
+                            left: 'prev,next today',
+                            center: 'title',
+                            right: 'month,agendaWeek,agendaDay'
+                        },
+                        forceEventDuration: true,
+                        events: data.map(function (currentValue) {
+                            return {
+                                title: "",
+                                start: currentValue.started,
+                                end: currentValue.stopped,
+                                allDay: false
+                            }
+                        })
+                    })
+                }
+            })
     </script>
 }
