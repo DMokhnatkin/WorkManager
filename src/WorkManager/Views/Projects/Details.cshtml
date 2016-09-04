@@ -8,7 +8,8 @@
 
 <div>
     <div class="jumbotron">
-        <h2>@Html.DisplayFor(model => model.Title)</h2><h3 id="today-duration"></h3>
+        <h2>@Html.DisplayFor(model => model.Title)</h2>
+        <h3 id="today-duration"></h3>
         <h6>@Html.DisplayFor(model => model.Description)</h6>
         <hr />
         <button class="btn btn-primary btn-lg" 
@@ -38,6 +39,9 @@
 
 @section scripts
 {
+    <script src="~/lib/moment/moment.js"></script>
+    <script src="~/lib/moment-duration-format/lib/moment-duration-format.js"></script>
+
     <script>
         $('#start-btn').click(function () {
             $.get('@Url.Action("start", "timers", new { projectId = Model.Id })');
@@ -54,7 +58,7 @@
                 $.get({
                     url: '@Url.Action("TodayStatistics", "timers", new { projectId = Model.Id })',
                     success: function (data) {
-                        $('#today-duration').html(data.duration.slice(0, 8));
+                        $('#today-duration').html(moment.duration(data.duration).format("hh:mm:ss", { trim : false }));
                     }
                 });
         }

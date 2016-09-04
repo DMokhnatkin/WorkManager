@@ -98,8 +98,7 @@ namespace WorkManager.Controllers.Api
             if (!await _authorizationService.AuthorizeAsync(User, project, "IsOwner"))
                 return NotFound();
 
-            TimeZoneInfo timeZone = _projects.GetTimeZone(project);
-            var now = TimeZoneInfo.ConvertTime(DateTime.UtcNow, TimeZoneInfo.Utc, timeZone);
+            var now = _timers.GetNowTime(project);
             var timers = _timers.GetTimersInInterval(project, now.Date, null);
             // Maybe allow db to calc total_time?
             var duration = new TimeSpan();
