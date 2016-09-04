@@ -72,7 +72,7 @@ namespace WorkManager.Controllers.Api
 
         // Get timers in time interval.
         [HttpGet("statistics/{projectId:int}")]
-        public async Task<IActionResult> Statistics(int projectId, [FromQuery]DateTime from, [FromQuery]DateTime? to)
+        public async Task<IActionResult> Statistics(int projectId, [FromQuery]DateTime start, [FromQuery]DateTime? end)
         {
             var project = await _projects.GetProjectAsync(projectId);
             if (project == null)
@@ -84,7 +84,7 @@ namespace WorkManager.Controllers.Api
             TimeZoneInfo timeZone = _projects.GetTimeZone(project);
 
             return new OkObjectResult(
-                _timers.GetTimersInInterval(project, from, to));
+                _timers.GetTimersInInterval(project, start, end));
         }
 
         // Get today timers
@@ -132,7 +132,7 @@ namespace WorkManager.Controllers.Api
         }
 
         // Get current month timers
-        [HttpGet("week/{projectId:int}")]
+        [HttpGet("month/{projectId:int}")]
         public async Task<IActionResult> MonthStatistics(int projectId)
         {
             var project = await _projects.GetProjectAsync(projectId);
