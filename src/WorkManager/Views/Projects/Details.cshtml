@@ -21,9 +21,7 @@
                 role="button"
                 id="stop-btn">Stop</button>
         <hr />
-        <div id="calendar">
-
-        </div>
+        <div id="calendar"></div>
     </div>
 </div>
 <div>
@@ -57,41 +55,42 @@
         }
     </script>
 
-    <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.23/jquery-ui.min.js" type="text/javascript"></script>
-    <link href="//arshaw.com/js/fullcalendar-1.5.3/fullcalendar/fullcalendar.css" rel="stylesheet" />
-    <script src="//arshaw.com/js/fullcalendar-1.5.3/fullcalendar/fullcalendar.min.js" type="text/javascript"></script>
-    <link href="http://arshaw.com/js/fullcalendar-1.5.3/fullcalendar/fullcalendar.print.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.0/themes/smoothness/jquery-ui.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.0/jquery-ui.min.js"></script>
+    <link href="//cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.0.0/fullcalendar.min.css" rel="stylesheet" />
+    <script src="//cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.0.0/fullcalendar.min.js" type="text/javascript"></script>
+    <link media="print" href="//cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.0.0/fullcalendar.print.css" rel="stylesheet" />
 
     <script>
-        $('#calendar').fullCalendar({
-            header: {
-                left: 'prev,next today',
-                center: 'title',
-                right: 'month,agendaWeek,agendaDay'
-            },
-            timeFormat: 'H(:mm)',
-            events: function (start, end, callback) {
-                $.get({
-                    url: '@Url.Action("Statistics", "Timers", new { projectId = Model.Id })',
-                    data: {
-                        start: start,
-                        end: end
-                    },
-                    success: function (result) {
-                        var events = [];
-                        result.forEach(function (val) {
-                            events.push({
-                                title: "",
-                                start: val.started,
-                                end: val.stopped,
-                                allDay: false,
+        $(document).ready(function () {
+            $('#calendar').fullCalendar({
+                header: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'month,agendaWeek,agendaDay'
+                },
+                timeFormat: 'H(:mm)',
+                events: function (start, end, timezone, callback) {
+                    $.get('@Url.Action("Statistics", "Timers", new { projectId = Model.Id })',
+                        {
+                            start: this.start,
+                            end: this.end
+                        },
+                        function (res) {
+                            var events = [];
+                            res.forEach(function (val) {
+                                events.push({
+                                    title: "",
+                                    start: val.started,
+                                    end: val.stopped,
+                                });
                             });
-                        });
-                        console.log(events);
-                        callback(events);
-                    }
-                });
-            }
+                            console.log(events);
+                            callback(events);
+                        },
+                        'json');
+                }
+            })
         });
     </script>
 }
