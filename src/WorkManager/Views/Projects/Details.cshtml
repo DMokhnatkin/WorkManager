@@ -69,7 +69,7 @@
                     center: 'title',
                     right: 'month,agendaWeek,agendaDay'
                 },
-                timeFormat: 'H(:mm)',
+                timeFormat: 'HH:mm',
                 events: function (start, end, timezone, callback) {
                     $.get('@Url.Action("Statistics", "Timers", new { projectId = Model.Id })',
                         {
