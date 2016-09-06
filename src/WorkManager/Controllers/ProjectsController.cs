@@ -36,7 +36,7 @@ namespace WorkManager.Controllers
         }
 
         // GET: Projects
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> List()
         {
             var userId = _userManager.GetUserId(User);
             return View(await _projects.GetProjectsForOwner(userId).ToListAsync());
