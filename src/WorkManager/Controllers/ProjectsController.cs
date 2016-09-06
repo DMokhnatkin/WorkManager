@@ -73,7 +73,7 @@ namespace WorkManager.Controllers
                 Title = project.Title,
                 Description = project.Description,
                 TimeZone = project.TimeZone,
-                Culture = project.Culture,
+                Culture = _projects.GetCulture(project),
                 Days = days
             };
 

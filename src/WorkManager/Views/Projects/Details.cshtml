@@ -70,6 +70,7 @@
                     right: 'month,agendaWeek,agendaDay'
                 },
                 timeFormat: 'HH:mm',
+                firstDay: @((int)Model.Culture.DateTimeFormat.FirstDayOfWeek),
                 events: function (start, end, timezone, callback) {
                     $.get('@Url.Action("Statistics", "Timers", new { projectId = Model.Id })',
                         {
@@ -78,7 +79,6 @@
                             groupBy: 'day'
                         },
                         function (res) {
-                            console.log(res);
                             var events = [];
                             res.forEach(function (day) {
                                 // Duration event (allDay event which shows common duration of timers for day) 
