@@ -114,10 +114,18 @@ namespace WorkManager.Controllers.Api
             var timers = _timers.GetTimersInInterval(project, now.Date, null);
             // Maybe allow db to calc total_time?
             var duration = new TimeSpan();
+            var isRunning = false;
             foreach (var timer in timers)
+            {
                 duration += _timers.GetDuration(timer);
+                if (timer.Stopped == null)
+                    isRunning = true;
+            }
 
-            return new OkObjectResult(new { timers = timers, duration = duration});
+            return new OkObjectResult(new {
+                timers = timers,
+                duration = duration,
+                isRunning = isRunning});
         }
 
         // Get current week timers

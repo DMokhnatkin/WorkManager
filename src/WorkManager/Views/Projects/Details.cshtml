@@ -9,7 +9,11 @@
 <div>
     <div class="jumbotron">
         <h2>@Html.DisplayFor(model => model.Title)</h2>
-        <h3 id="today-duration"></h3>
+        <div id="today-statistic">
+            <span id="today-duration"></span>
+            <img id="is-running" src="~/images/circle_green.png"/>
+            <img id="not-running" src="~/images/circle_red.png" />
+        </div>
         <h6>@Html.DisplayFor(model => model.Description)</h6>
         <hr />
         <button class="btn btn-primary btn-lg" 
@@ -35,21 +39,26 @@
 
     <script>
         $('#start-btn').click(function () {
-            $.get('@Url.Action("start", "timers", new { projectId = Model.Id })');
+            $.get('@Url.Action("start", "timers", new { projectId = Model.Id })')
+                .done(updateTodayStatistic());
         });
 
         $('#stop-btn').click(function () {
-            $.get('@Url.Action("stop", "timers", new { projectId = Model.Id })');
+            $.get('@Url.Action("stop", "timers", new { projectId = Model.Id })')
+                .done(updateTodayStatistic());
         });
 
-        window.setInterval(updateTodayDuration, 1000);
+        updateTodayStatistic();
+        window.setInterval(updateTodayStatistic, 1000);
 
-        function updateTodayDuration()
+        function updateTodayStatistic()
         {
                 $.get({
                     url: '@Url.Action("TodayStatistics", "Timers", new { projectId = Model.Id })',
                     success: function (data) {
                         $('#today-duration').html(moment.duration(data.duration).format("hh:mm:ss", { trim : false }));
+                        $('#is-running').css('display', data.isRunning ? 'inline' : 'none');
+                        $('#not-running').css('display', data.isRunning ? 'none' : 'inline');
                     }
                 });
         }
