@@ -85,5 +85,47 @@ namespace WorkManager.Services.Timers
                 // timer.Project is null. EF core and lazy loading. Smth strange.
                 return GetNowTime(timer.Project) - timer.Started;
         }
+
+        public IQueryable<ITimerGroup> GroupTimers(IQueryable<Timer> timers, TimersGroupFlags groupBy)
+        {
+            IQueryable<ITimerGroup> grouped = null;
+            if ((groupBy & TimersGroupFlags.day) == TimersGroupFlags.day)
+            {
+                grouped = timers
+                        .GroupBy(x => x.Started.Date)
+                        .Select(g => new DayTimerGroup {
+                            Date = g.Key,
+                            Childs = g.AsQueryable(),
+                            // Aggreaget is not implemented in ef core
+                            Duration = new TimeSpan(0)
+                        });
+            }
+            if ((groupBy & TimersGroupFlags.month) == TimersGroupFlags.month)
+            {
+                if ((groupBy & TimersGroupFlags.day) == TimersGroupFlags.day)
+                {
+                    // We have already grouped by day. Just add group by month.
+                    grouped = grouped
+                        .GroupBy(x => new DateTime(x.Date.Year, x.Date.Month, 0))
+                        .Select(g => new MonthTimerGroup
+                        {
+                            Date = g.Key,
+                            Childs = g.AsQueryable()
+                        });
+                }
+                else
+                {
+                    grouped = timers
+                        .GroupBy(x => new DateTime(x.Started.Date.Year, x.Started.Date.Month, 0))
+                        .Select(g => new MonthTimerGroup
+                        {
+                            Date = g.Key,
+                            Childs = g.AsQueryable()
+                        });
+                }
+            }
+
+            return grouped;
+        }
     }
 }

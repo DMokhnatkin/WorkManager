@@ -6,8 +6,6 @@ using WorkManager.Models;
 
 namespace WorkManager.Services.Timers
 {
-    public enum GroupTimersBy { day }
-
     public interface ITimerService
     {
         Task<Timer> StartTimerAsync(Project project);
@@ -16,5 +14,6 @@ namespace WorkManager.Services.Timers
         IQueryable<Timer> GetTimersInInterval(Project project, DateTime from, DateTime? to);
         TimeSpan GetDuration(Timer timer);
         DateTime GetNowTime(Project project);
+        IQueryable<ITimerGroup> GroupTimers(IQueryable<Timer> timers, TimersGroupFlags groupBy);
     }
 }

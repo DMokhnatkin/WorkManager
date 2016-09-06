@@ -74,21 +74,43 @@
                     $.get('@Url.Action("Statistics", "Timers", new { projectId = Model.Id })',
                         {
                             start: this.start,
-                            end: this.end
+                            end: this.end,
+                            groupBy: 'day'
                         },
                         function (res) {
+                            console.log(res);
                             var events = [];
-                            res.forEach(function (val) {
+                            res.forEach(function (day) {
+                                // Duration event (allDay event which shows common duration of timers for day) 
                                 events.push({
                                     title: "",
-                                    start: val.started,
-                                    end: val.stopped,
+                                    start: day.date,
+                                    duration: day.duration,
+                                    allDay: true,
+                                    backgroundColor: "#78DBE2"
+                                });
+                                day.childs.forEach(function (timer) {
+                                    events.push({
+                                        title: "",
+                                        start: timer.started,
+                                        end: timer.stopped,
+                                    });
                                 });
                             });
-                            console.log(events);
                             callback(events);
                         },
                         'json');
+                },
+                eventRender: function (event, element) {
+                    if (event.duration) {
+                        var cont = element.find(".fc-content");
+                        cont.html(event.duration);
+                    }
+                },
+                views: {
+                    month: {
+                        eventLimit: 5
+                    }
                 }
             })
         });

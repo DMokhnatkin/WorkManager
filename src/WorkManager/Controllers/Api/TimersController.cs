@@ -72,7 +72,7 @@ namespace WorkManager.Controllers.Api
 
         // Get timers in time interval.
         [HttpGet("statistics/{projectId:int}")]
-        public async Task<IActionResult> Statistics(int projectId, [FromQuery]DateTime start, [FromQuery]DateTime? end)
+        public async Task<IActionResult> Statistics(int projectId, [FromQuery]DateTime start, [FromQuery]DateTime? end, [FromQuery]List<string> groupBy)
         {
             var project = await _projects.GetProjectAsync(projectId);
             if (project == null)
@@ -82,9 +82,21 @@ namespace WorkManager.Controllers.Api
                 return NotFound();
 
             TimeZoneInfo timeZone = _projects.GetTimeZone(project);
+            var timers = _timers.GetTimersInInterval(project, start, end);
 
-            return new OkObjectResult(
-                _timers.GetTimersInInterval(project, start, end));
+            IQueryable grouped = null;
+            if (groupBy.Count != 0)
+            {
+                TimersGroupFlags groupByFlag = TimersGroupFlags.none;
+                if (groupBy.Contains("day"))
+                    groupByFlag |= TimersGroupFlags.day;
+                if (groupBy.Contains("month"))
+                    groupByFlag |= TimersGroupFlags.month;
+
+                grouped = _timers.GroupTimers(timers, groupByFlag);
+            }
+
+            return new OkObjectResult(grouped ?? timers);
         }
 
         // Get today timers
@@ -126,7 +138,7 @@ namespace WorkManager.Controllers.Api
             var startOfWeek = StartOfWeek(now, _culture.DateTimeFormat.FirstDayOfWeek);
 
             var timers = _timers.GetTimersInInterval(project, startOfWeek, null);
-            var grouped = timers.GroupBy(x => x.Started.Date).Select(g => new { Day = g.Key, Timers = g.ToList() });
+            var grouped = _timers.GroupTimers(timers, TimersGroupFlags.day);
 
             return new OkObjectResult(grouped);
         }
