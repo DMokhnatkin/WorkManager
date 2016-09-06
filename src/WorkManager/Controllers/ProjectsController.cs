@@ -105,7 +105,7 @@ namespace WorkManager.Controllers
                 project.Owner = await _userManager.GetUserAsync(User);
                 _context.Add(project);
                 await _context.SaveChangesAsync();
-                return RedirectToAction("Index");
+                return RedirectToAction("List");
             }
             return View(project);
         }
@@ -172,7 +172,7 @@ namespace WorkManager.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction("Index");
+                return RedirectToAction("List");
             }
             return View(project);
         }
@@ -207,8 +207,8 @@ namespace WorkManager.Controllers
             if (!await CanAccessToProject(project))
                 return NotFound();
 
-            _projects.Remove(project);
-            return RedirectToAction("Index");
+            await _projects.Remove(project);
+            return RedirectToAction("List");
         }
 
         private async Task<bool> CanAccessToProject(Project project)
