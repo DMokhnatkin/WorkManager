@@ -25,5 +25,6 @@ namespace WorkManager.Data
 
         public DbSet<Project> Projects { get; set; }
         public DbSet<Timer> Timers { get; set; }
+        public DbSet<Norm> Norms { get; set; }
     }
 }

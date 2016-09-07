@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
-using System.Threading.Tasks;
 
 namespace WorkManager.Models
 {
@@ -17,5 +16,7 @@ namespace WorkManager.Models
 
         public string OwnerId { get; set; }
         public ApplicationUser Owner { get; set; }
+
+        public virtual Norm Task { get; set; }
     }
 }
