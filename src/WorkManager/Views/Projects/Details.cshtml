@@ -41,30 +41,78 @@
     <script src="~/lib/moment-duration-format/lib/moment-duration-format.js"></script>
 
     <script>
+        var autoUpdateVar;
+
         $('#start-btn').click(function () {
             $.get('@Url.Action("start", "timers", new { projectId = Model.Id })')
-                .done(updateTodayStatistic());
+                .done(function(){
+                    synchTodayStatistic(rerenderTodayStatistic);
+                    autoUpdateVar = startAutoUpdate();
+                });
         });
 
         $('#stop-btn').click(function () {
             $.get('@Url.Action("stop", "timers", new { projectId = Model.Id })')
-                .done(updateTodayStatistic());
+                .done(function(){
+                    synchTodayStatistic(rerenderTodayStatistic);
+                    stopAutoUpdate(autoUpdateVar);
+                });
         });
 
-        updateTodayStatistic();
-        window.setInterval(updateTodayStatistic, 1000);
+        var todayStatistics = { duration: moment.duration(0), isRunning:false };
+        var lastSync;
+        var syncPeriod = moment.duration(20000);
+        var timerPeriod = moment.duration(1000);
 
-        function updateTodayStatistic()
-        {
-                $.get({
-                    url: '@Url.Action("TodayStatistics", "Timers", new { projectId = Model.Id })',
-                    success: function (data) {
-                        $('.today-duration').html(moment.duration(data.duration).format("hh:mm:ss", { trim : false }));
-                        $('#is-running').css('display', data.isRunning ? 'inline' : 'none');
-                        $('#not-running').css('display', data.isRunning ? 'none' : 'inline');
-                    }
-                });
+        @*Synch today statistic with server*@
+        function synchTodayStatistic(callback){
+            lastSync = moment();
+            $.get({
+                url: '@Url.Action("TodayStatistics", "Timers", new { projectId = Model.Id })',
+                success: function (data) {
+                    todayStatistics.duration = moment.duration(data.duration);
+                    todayStatistics.isRunning = data.isRunning;
+                    callback();
+                }
+            });
         }
+
+        function rerenderTodayStatistic(){
+            $('.today-duration').html(todayStatistics.duration.format("hh:mm:ss", { trim : false }));
+            $('#is-running').css('display', todayStatistics.isRunning ? 'inline' : 'none');
+            $('#not-running').css('display', todayStatistics.isRunning ? 'none' : 'inline');
+        }
+
+        @*Decide sync with server or just add time to duration and do it*@
+        @*sync - force synchroniztion with server*@
+        function updateTodayStatistic(sync){
+            todayStatistics.duration.add(timerPeriod);
+            rerenderTodayStatistic();
+            @*if needed synch with server and rerender after success*@
+            if (sync || !lastSync || (moment() - lastSync > syncPeriod))
+                synchTodayStatistic(rerenderTodayStatistic);
+        }
+
+        function startAutoUpdate() {
+            updateTodayStatistic();
+            return window.setInterval(updateTodayStatistic, timerPeriod);
+        }
+
+        function stopAutoUpdate(x) {
+            clearInterval(x);
+        }
+
+        @*When document is ready
+            1. Sync today statistic with server.
+            2. When success, rerender
+            3. if timer on server is already running, start autoupdate*@
+        $(document).ready(function(){
+            synchTodayStatistic(function(){
+                rerenderTodayStatistic();
+                if (todayStatistics.isRunning)
+                    autoUpdateVar = startAutoUpdate();
+            });
+        });
     </script>
 
     <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.0/themes/smoothness/jquery-ui.css">
