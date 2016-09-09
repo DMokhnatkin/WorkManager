@@ -147,7 +147,8 @@
                                     start: day.date,
                                     duration: day.duration,
                                     allDay: true,
-                                    backgroundColor: "#78DBE2"
+                                    backgroundColor: "#04B45F",
+                                    borderColor: "#04B45F"
                                 });
                                 day.childs.forEach(function (timer) {
                                     events.push({
@@ -161,10 +162,10 @@
                         },
                         'json');
                 },
-                eventRender: function (event, element) {
+                eventRender: function (event, element, view) {
                     if (event.duration) {
                         var cont = element.find(".fc-content");
-                        cont.html(event.duration);
+                        cont.html(moment.duration(event.duration).format(view.options.timeFormat, {trim: false}));
                     }
                 },
                 views: {

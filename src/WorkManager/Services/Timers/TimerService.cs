@@ -82,7 +82,6 @@ namespace WorkManager.Services.Timers
             if (timer.Stopped != null)
                 return timer.Stopped.Value - timer.Started;
             else
-                // timer.Project is null. EF core and lazy loading. Smth strange.
                 return GetNowTime(timer.Project) - timer.Started;
         }
 
@@ -92,12 +91,12 @@ namespace WorkManager.Services.Timers
             if ((groupBy & TimersGroupFlags.day) == TimersGroupFlags.day)
             {
                 grouped = timers
+                        .Include(x => x.Project) // Todo Lazy loading is not implemented in ef core 1.0. So use eager loading
                         .GroupBy(x => x.Started.Date)
-                        .Select(g => new DayTimerGroup {
+                        .Select(g => new DayTimerGroup{
                             Date = g.Key,
                             Childs = g.AsQueryable(),
-                            // Aggreaget is not implemented in ef core
-                            Duration = new TimeSpan(0)
+                            Duration = GetDuration(g.AsQueryable<Timer>())
                         });
             }
             if ((groupBy & TimersGroupFlags.month) == TimersGroupFlags.month)
@@ -126,6 +125,18 @@ namespace WorkManager.Services.Timers
             }
 
             return grouped;
+        }
+
+        public TimeSpan GetDuration(IQueryable<Timer> timers)
+        {
+
+            // TODO: use aggregate (not implemented in ef core 1.0)
+            //return Task.Run<TimeSpan>(() => 
+            //    timers.Aggregate(new TimeSpan(0), (sum, next) => sum.Add(GetDuration(next))));
+            var duration = new TimeSpan(0);
+            foreach (var z in timers.ToList())
+                duration += GetDuration(z);
+            return duration;
         }
     }
 }

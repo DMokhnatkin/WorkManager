@@ -13,6 +13,7 @@ namespace WorkManager.Services.Timers
         Task<Timer> GetOpenedTimerAsync(Project project);
         IQueryable<Timer> GetTimersInInterval(Project project, DateTime from, DateTime? to);
         TimeSpan GetDuration(Timer timer);
+        TimeSpan GetDuration(IQueryable<Timer> timers);
         DateTime GetNowTime(Project project);
         IQueryable<ITimerGroup> GroupTimers(IQueryable<Timer> timers, TimersGroupFlags groupBy);
     }
