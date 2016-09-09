@@ -13,8 +13,8 @@ namespace WorkManager.Models
         public int ProjectId { get; set; }
         public virtual Project Project { get; set; }
 
-        public NormType TaskType { get; set; }
+        public NormType Type { get; set; }
         // How much to work (every day/week/month/..)
-        public TimeSpan TaskTime { get; set; }
+        public TimeSpan Goal { get; set; }
     }
 }
