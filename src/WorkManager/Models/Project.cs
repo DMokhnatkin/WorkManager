@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Security.Claims;
 
@@ -17,6 +18,6 @@ namespace WorkManager.Models
         public string OwnerId { get; set; }
         public ApplicationUser Owner { get; set; }
 
-        public virtual Norm Task { get; set; }
+        public virtual Norm Norm { get; set; }
     }
 }

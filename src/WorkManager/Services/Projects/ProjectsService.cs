@@ -54,5 +54,15 @@ namespace WorkManager.Services.Projects
             _context.Projects.Remove(project);
             await _context.SaveChangesAsync();
         }
+
+        public async Task<Project> CreateProject(Project project)
+        {
+            _context.Add(project);
+            var norm = new Norm();
+            project.Norm = norm;
+
+            await _context.SaveChangesAsync();
+            return project;
+        }
     }
 }

@@ -9,6 +9,7 @@ namespace WorkManager.Services.Projects
 {
     public interface IProjectsService
     {
+        Task<Project> CreateProject(Project project);
         Task<Project> GetProjectAsync(int id);
         TimeZoneInfo GetTimeZone(Project project);
         CultureInfo GetCulture(Project project);

@@ -13,6 +13,7 @@ using WorkManager.Authorization;
 using WorkManager.Models.ProjectsViewModels;
 using System.Globalization;
 using WorkManager.Services.Projects;
+using WorkManager.Services.Norms;
 
 namespace WorkManager.Controllers
 {
@@ -23,16 +24,19 @@ namespace WorkManager.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IAuthorizationService _authorizationService;
         private readonly IProjectsService _projects;
+        private readonly INormService _norms;
 
         public ProjectsController(ApplicationDbContext context,
             UserManager<ApplicationUser> userManager,
             IAuthorizationService authorizationService,
-            IProjectsService projects)
+            IProjectsService projects,
+            INormService norms)
         {
             _context = context;
             _userManager = userManager;
             _authorizationService = authorizationService;
             _projects = projects;
+            _norms = norms;
         }
 
         // GET: Projects
@@ -74,7 +78,8 @@ namespace WorkManager.Controllers
                 Description = project.Description,
                 TimeZone = project.TimeZone,
                 Culture = _projects.GetCulture(project),
-                Days = days
+                Days = days,
+                Norm = await _norms.GetNorm(project) 
             };
 
             return View(model);
@@ -103,8 +108,7 @@ namespace WorkManager.Controllers
             if (ModelState.IsValid)
             {
                 project.Owner = await _userManager.GetUserAsync(User);
-                _context.Add(project);
-                await _context.SaveChangesAsync();
+                await _projects.CreateProject(project);
                 return RedirectToAction("List");
             }
             return View(project);
