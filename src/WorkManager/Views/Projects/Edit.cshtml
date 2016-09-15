@@ -40,6 +40,7 @@
                 <span asp-validation-for="Culture" class="text-danger" />
             </div>
         </div>
+        @Html.Partial("Norm/_EditPartial", Model.Norm);
         <div class="form-group">
             <div class="col-md-offset-2 col-md-10">
                 <input type="submit" value="Save" class="btn btn-default" />
@@ -49,7 +50,7 @@
 </form>
 
 <div>
-    <a asp-action="Index">Back to List</a>
+    <a asp-action="List">Back to List</a>
 </div>
 
 @section Scripts {
