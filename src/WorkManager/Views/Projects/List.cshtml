@@ -4,11 +4,23 @@
     ViewData["Title"] = "Index";
 }
 
-<h2>Index</h2>
-
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
+<br />
+@if (Model.Count() == 0)
+{
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <p>Empty</p>
+        </div>
+        <div class="panel-body">
+            <p>No items to show</p>
+            <p>
+                <a asp-action="Create">Create New</a>
+            </p>
+        </div>
+    </div>
+}
+else
+{
     @foreach (var item in Model)
     {
         <div class="panel panel-default">
@@ -24,3 +36,9 @@
             </div>
         </div>
     }
+    <p>
+        <a asp-action="Create">Create New</a>
+    </p>
+}    
+
+    
