@@ -64,5 +64,15 @@ namespace WorkManager.Services.Projects
             await _context.SaveChangesAsync();
             return project;
         }
+
+        public async Task<Project> UpdateAsync(Project project)
+        {
+            if (project.Norm.ProjectId != project.Id)
+                throw new ArgumentException();
+
+            _context.Update(project);
+            await _context.SaveChangesAsync();
+            return project;
+        }
     }
 }

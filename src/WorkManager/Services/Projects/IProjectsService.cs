@@ -16,5 +16,6 @@ namespace WorkManager.Services.Projects
         IQueryable<Project> GetProjectsForOwner(string ownerId);
         Task Remove(Project project);
         Task<bool> ExistsAsync(int id);
+        Task<Project> UpdateAsync(Project project);
     }
 }

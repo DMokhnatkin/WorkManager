@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 
 namespace WorkManager.Models
@@ -8,9 +10,10 @@ namespace WorkManager.Models
 
     public class Norm
     {
-        public int Id { get; set; }
-
+        [Required]
+        [Key]
         public int ProjectId { get; set; }
+        [ForeignKey("ProjectId")]
         public virtual Project Project { get; set; }
 
         public NormType Type { get; set; } = NormType.None;

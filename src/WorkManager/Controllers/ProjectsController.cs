@@ -138,27 +138,29 @@ namespace WorkManager.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Description,Title,TimeZone,Culture,Norm")] Project project)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Description,Title,TimeZone,Culture,Norm")] EditViewModel viewModel)
         {
-            if (id != project.Id)
+            if (id != viewModel.Id)
             {
                 return NotFound();
             }
-
-            if (!await CanAccessToProject(project))
-                return NotFound();
 
             if (ModelState.IsValid)
             {
                 try
                 {
-                    _context.Update(project);
-                    //_context.Update(project.Norm);
-                    await _context.SaveChangesAsync();
+                    // Map EditViewModel to Project
+                    Mapper.Initialize(cfg => cfg.CreateMap<EditViewModel, Project>());
+                    var project = Mapper.Map<Project>(viewModel);
+
+                    if (!await CanAccessToProject(project))
+                        return NotFound();
+
+                    await _projects.UpdateAsync(project);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!await _projects.ExistsAsync(project.Id))
+                    if (!await _projects.ExistsAsync(viewModel.Id))
                     {
                         return NotFound();
                     }
@@ -169,7 +171,7 @@ namespace WorkManager.Controllers
                 }
                 return RedirectToAction("List");
             }
-            return View(project);
+            return View(viewModel);
         }
 
         // GET: Projects/Delete/5
