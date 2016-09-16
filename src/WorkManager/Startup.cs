@@ -17,6 +17,7 @@ using WorkManager.Authorization;
 using static WorkManager.Authorization.IsOwnerRequirment;
 using WorkManager.Services.Projects;
 using WorkManager.Services.Timers;
+using WorkManager.Services.Norms;
 
 namespace WorkManager
 {
@@ -67,6 +68,7 @@ namespace WorkManager
 
             services.AddScoped<IProjectsService, ProjectsService>();
             services.AddScoped<ITimerService, TimerService>();
+            services.AddScoped<INormService, NormService>();
 
             // Add application services.
             services.AddTransient<IEmailSender, AuthMessageSender>();
