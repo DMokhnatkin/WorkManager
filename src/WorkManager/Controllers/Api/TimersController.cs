@@ -122,7 +122,7 @@ namespace WorkManager.Controllers.Api
                 timers = timers,
                 duration = duration,
                 isRunning = await _timers.GetOpenedTimerAsync(project) != null,
-                //progress = _norms.GetProgress(project, now.Date)
+                progress = await _norms.GetProgressAsync(project, now.Date)
             });
         }
 

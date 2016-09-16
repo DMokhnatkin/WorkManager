@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Security.Claims;
+using WorkManager.Models.Norms;
 
 namespace WorkManager.Models
 {

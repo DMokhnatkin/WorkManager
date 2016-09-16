@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using WorkManager.Data;
 using WorkManager.Models;
+using WorkManager.Models.Norms;
 using WorkManager.Services.Timers;
 
 namespace WorkManager.Services.Norms
@@ -32,8 +33,8 @@ namespace WorkManager.Services.Norms
             switch (norm.Type)
             {
                 case NormType.Day:
-                    throw new NotImplementedException();
-                    break;
+                    var duration = _timers.GetDuration(_timers.GetTimersInInterval(project, date.Date, date.Date.AddDays(1)));
+                    return new NormProgress(norm, norm.Goal, duration);
                 case NormType.Week:
                     throw new NotImplementedException();
                     break;

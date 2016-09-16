@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using WorkManager.Models;
+using WorkManager.Models.Norms;
 
 namespace WorkManager.Data
 {

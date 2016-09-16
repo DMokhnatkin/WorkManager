@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore.Migrations;
 using WorkManager.Models;
+using WorkManager.Models.Norms;
 
 namespace WorkManager.Data.Migrations
 {

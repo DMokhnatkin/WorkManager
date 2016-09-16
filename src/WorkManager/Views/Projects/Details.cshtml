@@ -1,4 +1,5 @@
 @model WorkManager.Models.ProjectsViewModels.DetailsViewModel
+@using WorkManager.Models.Norms
 
 @{
     ViewData["Title"] = Model.Title;
@@ -9,13 +10,23 @@
 <div>
     <div class="jumbotron">
         <h1>@Html.DisplayFor(model => model.Title)</h1>
-        <div class="lead">
+        <div class="lead row">
             <div id="is-running" class="alert alert-success" style="display:none" role="alert">
                 <span class="h3 today-duration"></span>
+                @if (Model.Norm.Type == NormType.Day)
+                {
+                    <span class="h3">/ @Model.Norm.Goal</span>
+                }
             </div>
             <div id="not-running" class="alert alert-danger" style="display:none" role="alert">
                 <span class="h3 today-duration"></span>
+                @if (Model.Norm.Type == NormType.Day)
+                {
+                    <span class="h3">/ @Model.Norm.Goal</span>
+                }
             </div>
+            <div id="today-norm-excecuted" role="button" data-toggle="tooltip" title="Norm is done today" class="alert alert-success" style="display:none">&#x2714;</div>
+            <div id="today-norm-not-excecuted" role="button" data-toggle="tooltip" title="Norm isn't done today" class="alert alert-danger" style="display:none">&#xD7;</div>
         </div>
         <p class="lead">@Html.DisplayFor(model => model.Description)</p>
         <hr />
@@ -72,6 +83,11 @@
                 success: function (data) {
                     todayStatistics.duration = moment.duration(data.duration);
                     todayStatistics.isRunning = data.isRunning;
+                    @*Norm*@
+                    todayStatistics.progress = data.progress;
+                    todayStatistics.progress.excecuted = moment.duration(data.progress.excecuted);
+                    todayStatistics.progress.goal = moment.duration(data.progress.goal);
+
                     callback();
                 }
             });
@@ -81,6 +97,10 @@
             $('.today-duration').html(todayStatistics.duration.format("hh:mm:ss", { trim : false }));
             $('#is-running').css('display', todayStatistics.isRunning ? 'inline' : 'none');
             $('#not-running').css('display', todayStatistics.isRunning ? 'none' : 'inline');
+            if (todayStatistics.progress.norm.type == @((int)NormType.Day )) {
+                $('#today-norm-excecuted').css('display', todayStatistics.progress.isCompleted ? 'inline' : 'none');
+                $('#today-norm-not-excecuted').css('display', !todayStatistics.progress.isCompleted ? 'inline' : 'none');
+            }
         }
 
         @*Decide sync with server or just add time to duration and do it*@
@@ -130,7 +150,7 @@
                     right: 'month,agendaWeek,agendaDay'
                 },
                 timeFormat: 'HH:mm',
-                firstDay: @((int)Model.Culture.DateTimeFormat.FirstDayOfWeek),
+                firstDay: @((int)Model.GetCulture().DateTimeFormat.FirstDayOfWeek),
                 events: function (start, end, timezone, callback) {
                     $.get('@Url.Action("Statistics", "Timers", new { projectId = Model.Id })',
                         {
