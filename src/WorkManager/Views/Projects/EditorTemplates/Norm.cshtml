@@ -1,0 +1,16 @@
+@model WorkManager.Models.Norm
+@using System.Linq;
+
+<div class="form-group">
+    <div class="col-sm-3">
+        <label asp-for="Goal" class="control-label"></label>
+        <input asp-for="Goal" class="form-control" />
+        <span asp-validation-for="Goal" class="text-danger" />
+    </div>
+
+    <div class="col-sm-3">
+        <label asp-for="Type" class="control-label"></label>
+        <select asp-for="Type" asp-items="Html.GetEnumSelectList(typeof(NormType))" class="form-control"></select>
+        <span asp-validation-for="Type" class="text-danger" />
+    </div>
+</div>

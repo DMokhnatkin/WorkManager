@@ -43,7 +43,8 @@
     "Microsoft.VisualStudio.Web.CodeGenerators.Mvc": {
       "version": "1.0.0-preview2-final",
       "type": "build"
-    } },
+    },
+    "AutoMapper": "5.1.1" },
 
   "tools": {
     "BundlerMinifier.Core": "2.0.238",

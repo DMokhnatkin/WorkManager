@@ -12,6 +12,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Globalization;
 using WorkManager.Services.Timers;
 using WorkManager.Services.Projects;
+using WorkManager.Services.Norms;
 
 namespace WorkManager.Controllers.Api
 {
@@ -24,18 +25,21 @@ namespace WorkManager.Controllers.Api
         private readonly IAuthorizationService _authorizationService;
         private readonly ITimerService _timers;
         private readonly IProjectsService _projects;
+        private readonly INormService _norms;
 
         public TimersController(ApplicationDbContext context,
             UserManager<ApplicationUser> userManager,
             IAuthorizationService authorizationService,
             ITimerService timers,
-            IProjectsService projects)
+            IProjectsService projects,
+            INormService norms)
         {
             _context = context;
             _userManager = userManager;
             _authorizationService = authorizationService;
             _timers = timers;
             _projects = projects;
+            _norms = norms;
         }
 
         [HttpGet("start/{projectId:int}")]
@@ -117,7 +121,9 @@ namespace WorkManager.Controllers.Api
             return new OkObjectResult(new {
                 timers = timers,
                 duration = duration,
-                isRunning = await _timers.GetOpenedTimerAsync(project) != null});
+                isRunning = await _timers.GetOpenedTimerAsync(project) != null,
+                //progress = _norms.GetProgress(project, now.Date)
+            });
         }
 
         // Get current week timers

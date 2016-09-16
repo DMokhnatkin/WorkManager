@@ -58,8 +58,8 @@ namespace WorkManager.Services.Projects
         public async Task<Project> CreateProject(Project project)
         {
             _context.Add(project);
-            var norm = new Norm();
-            project.Norm = norm;
+            if (project.Norm == null)
+                project.Norm = new Norm();
 
             await _context.SaveChangesAsync();
             return project;

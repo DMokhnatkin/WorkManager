@@ -18,6 +18,8 @@ namespace WorkManager.Models.ProjectsViewModels
         public string Culture { get; set; }
         public IEnumerable<SelectListItem> CultureList { get; set; }
 
+        public Norm Norm { get; set; } = new Norm();
+
         public CreateViewModel()
         {
             TimeZoneList = TimeZoneInfo.GetSystemTimeZones().Select(x => new SelectListItem() { Text = x.Id, Value = x.Id }).ToList();

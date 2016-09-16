@@ -14,6 +14,7 @@ using WorkManager.Models.ProjectsViewModels;
 using System.Globalization;
 using WorkManager.Services.Projects;
 using WorkManager.Services.Norms;
+using AutoMapper;
 
 namespace WorkManager.Controllers
 {
@@ -71,18 +72,13 @@ namespace WorkManager.Controllers
             for (int i = 0; days.Count != 7; i++)
                 days.Add((DayOfWeek)i);
 
-            DetailsViewModel model = new DetailsViewModel()
-            {
-                Id = project.Id,
-                Title = project.Title,
-                Description = project.Description,
-                TimeZone = project.TimeZone,
-                Culture = _projects.GetCulture(project),
-                Days = days,
-                Norm = await _norms.GetNorm(project) 
-            };
+            // Map Project to DetailsViewModel
+            Mapper.Initialize(cfg => cfg.CreateMap<Project, DetailsViewModel>());
+            var viewModel = Mapper.Map<DetailsViewModel>(project);
+            // Todo: EF 1.0 does not support lazy loading
+            viewModel.Norm = await _norms.GetNormAsync(project);
 
-            return View(model);
+            return View(viewModel);
         }
 
         // GET: Projects/Create
@@ -96,22 +92,19 @@ namespace WorkManager.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Description,Title,TimeZone,Culture")] CreateViewModel model)
+        public async Task<IActionResult> Create([Bind("Description,Title,TimeZone,Culture,Norm")] CreateViewModel viewModel)
         {
-            Project project = new Project()
-            {
-                Description = model.Description,
-                Title = model.Title,
-                TimeZone = model.TimeZone,
-                Culture = model.Culture
-            };
             if (ModelState.IsValid)
             {
+                // Map CreateViewModel to Project
+                Mapper.Initialize(cfg => cfg.CreateMap<CreateViewModel, Project>());
+                Project project = Mapper.Map<Project>(viewModel);
                 project.Owner = await _userManager.GetUserAsync(User);
+
                 await _projects.CreateProject(project);
                 return RedirectToAction("List");
             }
-            return View(project);
+            return View(viewModel);
         }
 
         // GET: Projects/Edit/5
@@ -131,14 +124,11 @@ namespace WorkManager.Controllers
             if (!await CanAccessToProject(project))
                 return NotFound();
 
-            var viewModel = new EditViewModel()
-            {
-                Id = project.Id,
-                Title = project.Title,
-                Description = project.Description,
-                TimeZone = project.TimeZone,
-                Culture = project.Culture,
-            };
+            // Map Project to EditViewModel
+            Mapper.Initialize(cfg => cfg.CreateMap<Project, EditViewModel>());
+            var viewModel = Mapper.Map<EditViewModel>(project);
+            // Todo: EF 1.0 does not support lazy loading
+            viewModel.Norm = await _norms.GetNormAsync(project);
 
             return View(viewModel);
         }
@@ -148,7 +138,7 @@ namespace WorkManager.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Description,Title,TimeZone,Culture")] Project project)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Description,Title,TimeZone,Culture,Norm")] Project project)
         {
             if (id != project.Id)
             {
@@ -163,6 +153,7 @@ namespace WorkManager.Controllers
                 try
                 {
                     _context.Update(project);
+                    //_context.Update(project.Norm);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)

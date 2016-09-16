@@ -14,6 +14,8 @@ namespace WorkManager.Models.ProjectsViewModels
 
         public string TimeZone { get; set; }
         public CultureInfo Culture { get; set; }
+        public Norm Norm { get; set; }
+
         public IEnumerable<DayOfWeek> Days { get; set; }
     }
 }
