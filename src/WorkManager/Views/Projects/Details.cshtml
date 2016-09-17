@@ -10,7 +10,8 @@
 <div>
     <div class="jumbotron">
         <h1>@Html.DisplayFor(model => model.Title)</h1>
-        <div class="lead row">
+        <p class="lead">@Html.DisplayFor(model => model.Description)</p>
+        <div class="lead">
             <div id="is-running" class="alert alert-success" style="display:none" role="alert">
                 <span class="h3 today-duration"></span>
                 @if (Model.Norm.Type == NormType.Day)
@@ -27,17 +28,19 @@
             </div>
             <div id="today-norm-excecuted" role="button" data-toggle="tooltip" title="Norm is done today" class="alert alert-success" style="display:none">&#x2714;</div>
             <div id="today-norm-not-excecuted" role="button" data-toggle="tooltip" title="Norm isn't done today" class="alert alert-danger" style="display:none">&#xD7;</div>
+            <button class="btn btn-primary btn-lg"
+                    href="#"
+                    role="button"
+                    id="start-btn">
+                Start
+            </button>
+            <button class="btn btn-primary btn-lg"
+                    href="#"
+                    role="button"
+                    id="stop-btn">
+                Stop
+            </button>
         </div>
-        <p class="lead">@Html.DisplayFor(model => model.Description)</p>
-        <hr />
-        <button class="btn btn-primary btn-lg" 
-                href="#" 
-                role="button"
-                id="start-btn">Start</button>
-        <button class="btn btn-primary btn-lg" 
-                href="#" 
-                role="button"
-                id="stop-btn">Stop</button>
         <hr />
         <div id="calendar"></div>
     </div>
