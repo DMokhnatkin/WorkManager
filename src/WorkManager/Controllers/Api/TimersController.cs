@@ -13,6 +13,7 @@ using System.Globalization;
 using WorkManager.Services.Timers;
 using WorkManager.Services.Projects;
 using WorkManager.Services.Norms;
+using WorkManager.Helpers;
 
 namespace WorkManager.Controllers.Api
 {
@@ -141,9 +142,10 @@ namespace WorkManager.Controllers.Api
             CultureInfo _culture = _projects.GetCulture(project);
 
             var now = TimeZoneInfo.ConvertTime(DateTime.UtcNow, TimeZoneInfo.Utc, timeZone);
-            var startOfWeek = StartOfWeek(now, _culture.DateTimeFormat.FirstDayOfWeek);
+            var startOfWeek = DateHelpers.GetStartOfWeek(now, _culture);
+            var endOfWeek = DateHelpers.GetEndOfWeek(now, _culture);
 
-            var timers = _timers.GetTimersInInterval(project, startOfWeek, null);
+            var timers = _timers.GetTimersInInterval(project, startOfWeek, endOfWeek);
             var grouped = _timers.GroupTimers(timers, TimersGroupFlags.day);
 
             return new OkObjectResult(grouped);
@@ -164,27 +166,13 @@ namespace WorkManager.Controllers.Api
             CultureInfo _culture = _projects.GetCulture(project);
 
             var now = TimeZoneInfo.ConvertTime(DateTime.UtcNow, TimeZoneInfo.Utc, timeZone);
-            var startOfMonth = StartOfMonth(now);
+            var startOfMonth = DateHelpers.GetStartOfMonth(now);
+            var endOfMonth = DateHelpers.GetEndOfMonth(now);
 
-            var timers = _timers.GetTimersInInterval(project, startOfMonth, null);
+            var timers = _timers.GetTimersInInterval(project, startOfMonth, endOfMonth);
             var grouped = timers.GroupBy(x => x.Started.Date).Select(g => new { Day = g.Key, Timers = g.ToList() });
 
             return new OkObjectResult(grouped);
-        }
-
-        private DateTime StartOfWeek(DateTime dt, DayOfWeek startOfWeek)
-        {
-            int diff = dt.DayOfWeek - startOfWeek;
-            if (diff < 0)
-            {
-                diff += 7;
-            }
-            return dt.AddDays(-1 * diff).Date;
-        }
-
-        private DateTime StartOfMonth(DateTime dt)
-        {
-            return new DateTime(dt.Year, dt.Month, 0);
         }
     }
 }
