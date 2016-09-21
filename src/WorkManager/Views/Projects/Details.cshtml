@@ -8,6 +8,9 @@
 <h2>Details</h2>
 
 <div>
+    <div>
+        <a asp-action="List"> &lt;&lt; Back to List</a>
+    </div>
     <div class="jumbotron">
         <h1>@Html.DisplayFor(model => model.Title)</h1>
         <p class="lead">@Html.DisplayFor(model => model.Description)</p>
@@ -41,12 +44,10 @@
                 Stop
             </button>
         </div>
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-default btn-lg">Edit</a>
         <hr />
         <div id="calendar"></div>
     </div>
-</div>
-<div>
-    <a asp-action="List">Back to List</a>
 </div>
 
 @section scripts

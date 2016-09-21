@@ -6,6 +6,10 @@
 
 <h2>Edit</h2>
 
+<div>
+    <a asp-action="Details" asp-route-id="@Model.Id"> &lt;&lt; Back to Item</a>
+</div>
+
 <form asp-action="Edit">
     <div class="form-horizontal">
         <h4>@Model.Title</h4>
@@ -53,10 +57,6 @@
         </div>
     </div>
 </form>
-
-<div>
-    <a asp-action="List">Back to List</a>
-</div>
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
