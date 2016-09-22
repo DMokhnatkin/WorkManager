@@ -29,8 +29,8 @@
                     <span class="h3">/ @Model.Norm.Goal</span>
                 }
             </div>
-            <div id="today-norm-excecuted" role="button" data-toggle="tooltip" title="Norm is done today" class="alert alert-success" style="display:none">&#x2714;</div>
-            <div id="today-norm-not-excecuted" role="button" data-toggle="tooltip" title="Norm isn't done today" class="alert alert-danger" style="display:none">&#xD7;</div>
+            <div id="norm-excecuted" role="button" data-toggle="tooltip" title="Norm is done" class="alert alert-success" style="display:none">&#x2714;</div>
+            <div id="norm-not-excecuted" role="button" data-toggle="tooltip" title="Norm isn't done" class="alert alert-danger" style="display:none">&#xD7;</div>
             <button class="btn btn-primary btn-lg"
                     href="#"
                     role="button"
@@ -44,6 +44,20 @@
                 Stop
             </button>
         </div>
+        <div class="lead">
+            @if (Model.Norm.Type == NormType.Week)
+            {
+                <p>Week goal : @Model.Norm.Goal</p>
+            }
+            @if (Model.Norm.Type == NormType.Month)
+            {
+                <p>Month goal : @Model.Norm.Goal</p>
+            }
+            @if (Model.Norm.Type == NormType.Project)
+            {
+                <p>Project goal : @Model.Norm.Goal</p>
+            }
+            </div>
         <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-default btn-lg">Edit</a>
         <hr />
         <div id="calendar"></div>
@@ -101,10 +115,8 @@
             $('.today-duration').html(todayStatistics.duration.format("hh:mm:ss", { trim : false }));
             $('#is-running').css('display', todayStatistics.isRunning ? 'inline' : 'none');
             $('#not-running').css('display', todayStatistics.isRunning ? 'none' : 'inline');
-            if (todayStatistics.progress.norm.type == @((int)NormType.Day )) {
-                $('#today-norm-excecuted').css('display', todayStatistics.progress.isCompleted ? 'inline' : 'none');
-                $('#today-norm-not-excecuted').css('display', !todayStatistics.progress.isCompleted ? 'inline' : 'none');
-            }
+            $('#norm-excecuted').css('display', todayStatistics.progress.isCompleted ? 'inline' : 'none');
+            $('#norm-not-excecuted').css('display', !todayStatistics.progress.isCompleted ? 'inline' : 'none');
         }
 
         @*Decide sync with server or just add time to duration and do it*@
