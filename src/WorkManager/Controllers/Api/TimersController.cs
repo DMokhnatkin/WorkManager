@@ -18,7 +18,7 @@ using WorkManager.Helpers;
 namespace WorkManager.Controllers.Api
 {
     [Produces("application/json")]
-    [Route("api/Timers")]
+    [Route("api/timers")]
     public class TimersController : Controller
     {
         private readonly ApplicationDbContext _context;

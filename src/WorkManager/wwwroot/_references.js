@@ -1,4 +1,7 @@
 ﻿/// <autosync enabled="true" />
+/// <reference path="app/detailsapp.js" />
+/// <reference path="app/progresscontroller.js" />
+/// <reference path="app/progressfactory.js" />
 /// <reference path="js/site.js" />
 /// <reference path="lib/bootstrap/dist/js/bootstrap.js" />
 /// <reference path="lib/jquery/dist/jquery.js" />

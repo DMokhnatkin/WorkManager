@@ -12,7 +12,7 @@ namespace WorkManager.Models.Norms
     [DataContract]
     public class Norm
     {
-        [Required, Key, DataMember]
+        [Required, Key]
         public int ProjectId { get; set; }
         [ForeignKey("ProjectId")]
         public virtual Project Project { get; set; }
