@@ -68,7 +68,13 @@ namespace WorkManager.Services.Timers
             if (from != null)
                 query = query.Where(x => x.Started >= from);
             if (to != null)
-                query = query.Where(x => x.Stopped <= to);
+            {
+                if (GetNowTime(project) < to)
+                    // Add opened timers ('to' date is in future)
+                    query = query.Where(x => x.Stopped <= to || x.Stopped == null);
+                else
+                    query = query.Where(x => x.Stopped <= to);
+            }
             return query;
         }
 
