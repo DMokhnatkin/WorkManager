@@ -15,22 +15,18 @@
         <h1>@Html.DisplayFor(model => model.Title)</h1>
         <p class="lead">@Html.DisplayFor(model => model.Description)</p>
         <div class="lead">
-            <div ng-show="realtimeInfo.isRunning" class="alert alert-success" style="display:inline;">
-                <span class="h3 today-duration" ng-bind-template="{{formatDuration(realtimeInfo.progress.excecuted)}}"></span>
+            <div class="alert alert-info" style="display:inline;">
+                <span class="h3" ng-bind-template="{{formatDuration(realtimeInfo.progress.excecuted)}}"></span>
                 @if (Model.Norm.Type == NormType.Day)
                 {
                     <span class="h3">/ @Model.Norm.Goal</span>
                 }
-            </div>
-            <div ng-show="!realtimeInfo.isRunning" class="alert alert-danger" style="display:inline;">
-                <span class="h3 today-duration" ng-bind-template="{{formatDuration(realtimeInfo.progress.excecuted)}}"></span>
-                @if (Model.Norm.Type == NormType.Day)
-                {
-                    <span class="h3">/ @Model.Norm.Goal</span>
-                }
+                <img ng-show="realtimeInfo.isRunning" src="~/images/clock.gif" />
             </div>
             <div ng-show="realtimeInfo.progress.isCompleted" role="button" data-toggle="tooltip" title="Norm is done" class="alert alert-success" style="display:inline;">&#x2714;</div>
             <div ng-show="!realtimeInfo.progress.isCompleted" role="button" data-toggle="tooltip" title="Norm isn't done" class="alert alert-danger" style="display:inline;">&#xD7;</div>
+        </div>
+        <div>
             <button class="btn btn-primary btn-lg"
                     href="#"
                     role="button"
@@ -57,7 +53,7 @@
             {
                 <p>Project goal : @Model.Norm.Goal</p>
             }
-            </div>
+        </div>
         <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-default btn-lg">Edit</a>
         <hr />
         <div id="calendar"></div>
